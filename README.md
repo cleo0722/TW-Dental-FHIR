@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 =======
 # 台灣牙科口腔檢查 FHIR Profile 雛形
 ## TW Dental Observation Profile
@@ -167,4 +165,3 @@ Demo 入口：https://cleo0722.github.io/tw-dental-fhir/tw_dental_fhir_demo.html
 ---
 
 *本作品由 牙起來隊伍 製作，參加 第二屆 FHIR 大健康 PROJECTATION*
->>>>>>> efc0157 (first commit)
