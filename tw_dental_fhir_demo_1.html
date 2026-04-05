@@ -2,323 +2,392 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TW Dental FHIR — 台灣牙科口腔檢查 Profile</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TW Dental FHIR v2</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
-  --blue:#1A73E8;--blue-light:#E8F0FE;--blue-mid:#4285F4;--blue-dark:#1557B0;
-  --green:#34A853;--green-light:#E6F4EA;--green-dark:#137333;
-  --red:#EA4335;--red-light:#FCE8E6;--red-dark:#B31412;
-  --yellow:#FBBC04;--yellow-light:#FEF7E0;--yellow-dark:#B06000;
-  --gray50:#F8F9FA;--gray100:#F1F3F4;--gray200:#E8EAED;--gray300:#DADCE0;
-  --gray400:#BDC1C6;--gray500:#9AA0A6;--gray600:#80868B;--gray700:#5F6368;
-  --gray800:#3C4043;--gray900:#202124;
-  --teal:#00897B;--teal-light:#E0F2F1;--teal-dark:#004D40;
-  --surface:#FFFFFF;--bg:#F8F9FA;
-  --radius:8px;--radius-lg:12px;--radius-xl:16px;
-  --shadow:0 1px 3px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.1);
-  --shadow-md:0 2px 6px rgba(60,64,67,.15),0 1px 3px rgba(60,64,67,.1);
+  --blue:#1A73E8;--blue-lt:#E8F0FE;--blue-dk:#1557B0;
+  --green:#34A853;--green-lt:#E6F4EA;--green-dk:#137333;
+  --red:#EA4335;--red-lt:#FCE8E6;--red-dk:#B31412;
+  --yellow:#FBBC04;--yellow-lt:#FEF7E0;--yellow-dk:#B06000;
+  --teal:#00897B;--teal-lt:#E0F2F1;--teal-dk:#004D40;
+  --g0:#fff;--g50:#F8F9FA;--g100:#F1F3F4;--g200:#E8EAED;
+  --g300:#DADCE0;--g400:#BDC1C6;--g500:#9AA0A6;--g600:#80868B;
+  --g700:#5F6368;--g800:#3C4043;--g900:#202124;
+  --r:8px;--rlg:12px;
+  --sh:0 1px 3px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.1);
+  --sh2:0 2px 8px rgba(60,64,67,.18);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Google Sans',Roboto,Arial,sans-serif;background:var(--bg);color:var(--gray900);font-size:14px;line-height:1.5}
+body{font-family:'DM Sans',sans-serif;background:var(--g50);color:var(--g900);font-size:14px}
 input,select,textarea,button{font-family:inherit}
 
 /* ── TOPBAR ── */
-.topbar{background:var(--surface);border-bottom:1px solid var(--gray200);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.topbar-logo{display:flex;align-items:center;gap:8px}
-.logo-mark{width:28px;height:28px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo-mark svg{width:16px;height:16px}
-.topbar-title{font-size:16px;font-weight:500;color:var(--gray900)}
-.topbar-sub{font-size:12px;color:var(--gray600);margin-left:4px}
-.topbar-nav{display:flex;gap:2px;margin-left:auto}
-.tnb{padding:6px 14px;font-size:13px;font-weight:500;border:none;border-radius:20px;background:transparent;cursor:pointer;color:var(--gray700);transition:all .15s;white-space:nowrap}
-.tnb:hover{background:var(--gray100)}
-.tnb.on{background:var(--blue-light);color:var(--blue-dark)}
+.topbar{background:#fff;border-bottom:1px solid var(--g200);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:18px;height:18px;fill:#fff}
+.app-title{font-size:15px;font-weight:600}
+.app-ver{font-size:11px;color:var(--g500);padding:2px 6px;border-radius:4px;background:var(--g100);margin-left:4px;font-family:'JetBrains Mono',monospace}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.doc-chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--blue-lt);color:var(--blue-dk);font-size:12px;font-weight:500}
+
+/* ── NAV TABS ── */
+.nav-wrap{background:#fff;border-bottom:1px solid var(--g200);padding:0 20px;display:flex;gap:4px;overflow-x:auto}
+.ntb{padding:14px 16px;font-size:13px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--g600);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.ntb:hover{color:var(--g900);background:var(--g50)}
+.ntb.on{color:var(--blue);border-bottom-color:var(--blue)}
 
 /* ── LAYOUT ── */
-.main{padding:24px;max-width:1280px;margin:0 auto}
+.main{padding:20px;max-width:1400px;margin:0 auto}
 .g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-.g3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);gap:16px}
-.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
+.g3{display:grid;grid-template-columns:300px minmax(0,1fr) 280px;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:1100px){.g3{grid-template-columns:1fr}}
+@media(max-width:700px){.g2{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--gray200);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
-.card-hd{font-size:11px;font-weight:500;color:var(--gray600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.card-hd-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.card{background:#fff;border:1px solid var(--g200);border-radius:var(--rlg);padding:18px;margin-bottom:14px}
+.card-hd{font-size:11px;font-weight:600;color:var(--g600);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
 /* ── FORM ── */
-.field{margin-bottom:12px}
-.field label{font-size:12px;font-weight:500;color:var(--gray700);display:block;margin-bottom:5px}
-input[type=text],input[type=date],input[type=number],select{
-  width:100%;padding:9px 12px;border:1px solid var(--gray300);border-radius:var(--radius);
-  background:var(--surface);font-size:13px;color:var(--gray900);transition:border .15s,box-shadow .15s
-}
+.field{margin-bottom:11px}
+.field label{font-size:12px;font-weight:500;color:var(--g700);display:block;margin-bottom:4px}
+.field .hint{font-size:11px;color:var(--g500);margin-top:3px}
+input[type=text],input[type=date],input[type=number],input[type=password],select{
+  width:100%;padding:9px 12px;border:1px solid var(--g300);border-radius:var(--r);
+  background:#fff;font-size:13px;color:var(--g900);transition:border .15s,box-shadow .15s}
 input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
-textarea{width:100%;padding:9px 12px;border:1px solid var(--gray300);border-radius:var(--radius);
-  background:var(--surface);font-size:13px;color:var(--gray900);resize:vertical;min-height:56px;transition:border .15s}
+textarea{width:100%;padding:9px 12px;border:1px solid var(--g300);border-radius:var(--r);
+  background:#fff;font-size:13px;color:var(--g900);resize:vertical;min-height:52px}
 textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235F6368' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235F6368' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 
 /* ── BUTTON ── */
-.btn{padding:8px 18px;border:1px solid var(--gray300);border-radius:20px;background:var(--surface);cursor:pointer;font-weight:500;color:var(--gray800);transition:all .15s;font-size:13px;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{background:var(--gray50);box-shadow:var(--shadow)}
+.btn{padding:8px 18px;border:1px solid var(--g300);border-radius:20px;background:#fff;cursor:pointer;font-weight:500;color:var(--g800);transition:all .15s;font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--g50);box-shadow:var(--sh)}
 .btn-prim{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn-prim:hover{background:var(--blue-dark);border-color:var(--blue-dark);box-shadow:var(--shadow-md)}
+.btn-prim:hover{background:var(--blue-dk);border-color:var(--blue-dk)}
 .btn-prim:active{transform:scale(.98)}
-.btn-full{width:100%;justify-content:center;margin-top:8px;border-radius:var(--radius)}
-.btn-sm{padding:5px 12px;font-size:12px}
-.btn-danger{background:var(--red-light);color:var(--red-dark);border-color:transparent}
-.btn-success{background:var(--green-light);color:var(--green-dark);border-color:transparent}
+.btn-full{width:100%;justify-content:center;margin-top:8px;border-radius:var(--r)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-mode{padding:5px 12px;border-radius:20px;border:1px solid var(--g300);font-size:12px;cursor:pointer;font-weight:500;background:#fff;color:var(--g700);transition:all .15s}
+.btn-mode.on{background:var(--teal-lt);color:var(--teal-dk);border-color:var(--teal)}
 
-/* ── BADGE / PILL ── */
-.pill{display:inline-flex;align-items:center;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
-.ph{background:var(--green-light);color:var(--green-dark)}
-.pc{background:var(--red-light);color:var(--red-dark)}
-.pr{background:var(--blue-light);color:var(--blue-dark)}
-.pm{background:var(--gray100);color:var(--gray700);border:1px dashed var(--gray400)}
-.pp{background:var(--yellow-light);color:var(--yellow-dark)}
-.po{background:var(--gray100);color:var(--gray600)}
-.pid-badge{font-size:11px;padding:3px 10px;background:var(--blue-light);color:var(--blue-dark);border-radius:20px;font-family:monospace;font-weight:500}
-.org-badge{font-size:11px;padding:3px 10px;background:var(--green-light);color:var(--green-dark);border-radius:20px;font-family:monospace;font-weight:500}
+/* ── PILL ── */
+.pill{display:inline-flex;align-items:center;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:500;white-space:nowrap}
+.ph{background:var(--green-lt);color:var(--green-dk)}
+.pc{background:var(--red-lt);color:var(--red-dk)}
+.pr{background:var(--blue-lt);color:var(--blue-dk)}
+.pm{background:var(--g100);color:var(--g700);border:1px dashed var(--g400)}
+.pp{background:var(--yellow-lt);color:var(--yellow-dk)}
+.po{background:var(--g100);color:var(--g600)}
+.pt2{background:var(--teal-lt);color:var(--teal-dk)}
+.pid-badge{font-size:11px;padding:3px 9px;background:var(--blue-lt);color:var(--blue-dk);border-radius:20px;font-family:'JetBrains Mono',monospace;font-weight:500}
+.org-badge{font-size:11px;padding:3px 9px;background:var(--green-lt);color:var(--green-dk);border-radius:20px;font-family:'JetBrains Mono',monospace;font-weight:500}
 
-/* ── STAT CARD ── */
-.stat{background:var(--gray50);border-radius:var(--radius);padding:14px 12px;text-align:center;border:1px solid var(--gray200)}
-.stat-n{font-size:24px;font-weight:400;line-height:1;margin-bottom:4px}
-.stat-l{font-size:11px;color:var(--gray600)}
+/* ── STAT ── */
+.stat{background:var(--g50);border-radius:var(--r);padding:12px;text-align:center;border:1px solid var(--g200)}
+.stat-n{font-size:22px;font-weight:300;line-height:1;margin-bottom:3px}
+.stat-l{font-size:11px;color:var(--g600)}
 
 /* ── STATUS BUTTONS ── */
-.st-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
-.st-btn{padding:9px 4px;border:1px solid var(--gray200);border-radius:var(--radius);background:var(--surface);cursor:pointer;color:var(--gray700);text-align:center;font-size:12px;font-weight:500;transition:all .15s}
-.st-btn:hover{border-color:var(--gray400);background:var(--gray50)}
-.st-btn.onh{background:var(--green-light);color:var(--green-dark);border-color:#34A853}
-.st-btn.onc{background:var(--red-light);color:var(--red-dark);border-color:#EA4335}
-.st-btn.onr{background:var(--blue-light);color:var(--blue-dark);border-color:#1A73E8}
-.st-btn.onm{background:var(--gray100);color:var(--gray700);border-color:var(--gray400);border-style:dashed}
-.st-btn.onp{background:var(--yellow-light);color:var(--yellow-dark);border-color:#FBBC04}
-.st-btn.ono{background:var(--gray100);color:var(--gray600);border-color:var(--gray300)}
-
-/* ── SURFACE CHIPS ── */
-.surf-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.sf-btn{font-size:12px;padding:4px 12px;border:1px solid var(--gray300);border-radius:20px;background:none;cursor:pointer;color:var(--gray700);transition:all .15s;font-weight:500}
-.sf-btn:hover{border-color:var(--blue);color:var(--blue)}
-.sf-btn.on{background:var(--blue-light);color:var(--blue-dark);border-color:var(--blue)}
+.st-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:4px}
+.st-btn{padding:8px 4px;border:1px solid var(--g200);border-radius:var(--r);background:#fff;cursor:pointer;color:var(--g700);text-align:center;font-size:12px;font-weight:500;transition:all .15s}
+.st-btn:hover{border-color:var(--g400);background:var(--g50)}
+.st-btn.onh{background:var(--green-lt);color:var(--green-dk);border-color:#34A853}
+.st-btn.onc{background:var(--red-lt);color:var(--red-dk);border-color:#EA4335}
+.st-btn.onr{background:var(--blue-lt);color:var(--blue-dk);border-color:#1A73E8}
+.st-btn.onm{background:var(--g100);color:var(--g700);border-color:var(--g400);border-style:dashed}
+.st-btn.onp{background:var(--yellow-lt);color:var(--yellow-dk);border-color:#FBBC04}
+.st-btn.ono{background:var(--g100);color:var(--g600);border-color:var(--g300)}
+.surf-wrap{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.sf-btn{font-size:11px;padding:4px 10px;border:1px solid var(--g300);border-radius:20px;background:none;cursor:pointer;color:var(--g700);transition:all .15s}
+.sf-btn.on{background:var(--blue-lt);color:var(--blue-dk);border-color:var(--blue)}
 
 /* ── TOAST ── */
-.toast{padding:10px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;margin-top:8px;display:none;border:1px solid;border-radius:20px}
-.tok{background:var(--green-light);color:var(--green-dark);border-color:#34A853}
-.tob{background:var(--blue-light);color:var(--blue-dark);border-color:#1A73E8}
-
-/* ── NOTEPAD ── */
-.nb-section{border:1px solid var(--gray200);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
-.nb-header{padding:8px 12px;background:var(--gray50);border-bottom:1px solid var(--gray200);display:flex;align-items:center;justify-content:space-between}
-.nb-header-title{font-size:11px;font-weight:500;color:var(--gray700);text-transform:uppercase;letter-spacing:.05em}
-.nb-body{padding:10px 12px}
-.nb-id-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-.nb-id-label{font-size:11px;color:var(--gray600);min-width:60px}
-.fhir-code{font-family:'Roboto Mono',monospace;font-size:11px;background:var(--gray50);border-radius:6px;padding:10px;overflow-x:auto;white-space:pre;max-height:160px;overflow-y:auto;line-height:1.65;border:1px solid var(--gray200);color:var(--gray800)}
-.jk{color:#1A73E8}.js{color:#137333}.jn{color:#B06000}.jb{color:#B31412}
-.copy-btn{padding:3px 9px;border:1px solid var(--gray300);border-radius:20px;font-size:11px;cursor:pointer;background:var(--surface);color:var(--gray700);transition:all .15s;white-space:nowrap}
-.copy-btn:hover{background:var(--gray100)}
+.toast{padding:9px 14px;border-radius:20px;font-size:12px;font-weight:500;margin-top:7px;display:none;border:1px solid}
+.tok{background:var(--green-lt);color:var(--green-dk);border-color:#34A853}
+.tob{background:var(--blue-lt);color:var(--blue-dk);border-color:#1A73E8}
+.tor{background:var(--red-lt);color:var(--red-dk);border-color:#EA4335}
 
 /* ── TIMELINE ── */
-.tl-item{border:1px solid var(--gray200);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .13s}
-.tl-item:hover{border-color:var(--blue);background:var(--blue-light)}
-.tl-body{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray200);font-size:12px;color:var(--gray700);line-height:1.8}
+.tl-item{border:1px solid var(--g200);border-radius:var(--r);padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:all .13s}
+.tl-item:hover{border-color:var(--blue);background:var(--blue-lt)}
+.tl-body{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--g200);font-size:12px;color:var(--g700);line-height:1.8}
 .tl-item.open .tl-body{display:block}
 .tl-item.open{border-color:var(--blue)}
 
 /* ── DETAIL ROW ── */
-.det-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gray100);font-size:13px}
+.det-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--g100);font-size:13px}
 .det-row:last-child{border-bottom:none}
-.dl{color:var(--gray600)}.dv{font-weight:500;text-align:right;max-width:60%;word-break:break-all}
-.advice-box{margin-top:10px;padding:12px;background:var(--yellow-light);border-radius:var(--radius);font-size:12px;color:var(--yellow-dark);line-height:1.7;border:1px solid #FBBC04}
-.good-box{padding:12px;background:var(--green-light);border-radius:var(--radius);font-size:12px;color:var(--green-dark);margin-top:10px}
+.dl{color:var(--g600)}.dv{font-weight:500;text-align:right;max-width:62%;word-break:break-all}
+.advice-box{margin-top:10px;padding:11px 13px;background:var(--yellow-lt);border-radius:var(--r);font-size:12px;color:var(--yellow-dk);line-height:1.7;border:1px solid #FBBC04}
+.good-box{padding:11px;background:var(--green-lt);border-radius:var(--r);font-size:12px;color:var(--green-dk);margin-top:10px}
 
-/* ── HISTORY PANEL ── */
-.hist-panel{background:var(--gray50);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;border:1px solid var(--gray200)}
-.hist-title{font-size:10px;font-weight:500;color:var(--gray600);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-.hist-entry{font-size:12px;padding:5px 0;border-bottom:1px solid var(--gray200);color:var(--gray700);display:flex;justify-content:space-between;align-items:center}
+/* ── HIST ── */
+.hist-panel{background:var(--g50);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;border:1px solid var(--g200)}
+.hist-title{font-size:10px;font-weight:600;color:var(--g600);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.hist-entry{font-size:12px;padding:5px 0;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center}
 .hist-entry:last-child{border-bottom:none}
-.hist-empty{font-size:12px;color:var(--gray500);text-align:center;padding:8px 0}
+.hist-empty{font-size:12px;color:var(--g500);text-align:center;padding:8px 0}
 
-/* ── XRAY ZONE ── */
-.xray-zone{border:2px dashed var(--gray300);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .18s;background:var(--gray50);position:relative;overflow:hidden}
-.xray-zone:hover{border-color:var(--blue);background:var(--blue-light)}
-.xray-preview{max-width:100%;border-radius:6px;margin-top:8px;max-height:120px;object-fit:contain;display:none}
+/* ── XRAY ── */
+.xray-zone{border:2px dashed var(--g300);border-radius:var(--r);padding:18px;text-align:center;cursor:pointer;transition:all .18s;background:var(--g50);position:relative;overflow:hidden}
+.xray-zone:hover{border-color:var(--blue);background:var(--blue-lt)}
+.xray-preview{max-width:100%;border-radius:6px;margin-top:8px;max-height:110px;object-fit:contain;display:none}
 
-/* ── SEARCH ── */
-.search-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+/* ── NOTEPAD ── */
+.nb-sec{border:1px solid var(--g200);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
+.nb-hd{padding:7px 11px;background:var(--g50);border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between}
+.nb-hd-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-family:'JetBrains Mono',monospace}
+.tag-org{background:var(--green-lt);color:var(--green-dk)}
+.tag-pat{background:var(--blue-lt);color:var(--blue-dk)}
+.tag-obs{background:var(--teal-lt);color:var(--teal-dk)}
+.tag-bun{background:var(--yellow-lt);color:var(--yellow-dk)}
+.nb-body{padding:9px 11px}
+.nb-id-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+.fhir-code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--g50);border-radius:6px;padding:9px;overflow-x:auto;white-space:pre;max-height:120px;overflow-y:auto;line-height:1.65;border:1px solid var(--g200);color:var(--g800)}
+.jk{color:#1A73E8}.js{color:#137333}.jn{color:#B06000}.jb{color:#B31412}
+.copy-btn{padding:3px 8px;border:1px solid var(--g300);border-radius:20px;font-size:11px;cursor:pointer;background:#fff;color:var(--g700);transition:all .15s}
+.copy-btn:hover{background:var(--g100)}
+
+/* ── AUDIT ── */
+.audit-row{font-size:11px;font-family:'JetBrains Mono',monospace;padding:5px 0;border-bottom:1px solid var(--g100);color:var(--g700);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.audit-row:last-child{border-bottom:none}
 
 /* ── PAGE ── */
 .page{display:none}.page.active{display:block}
+.sec-item{display:flex;gap:11px;padding:13px;border:1px solid var(--g200);border-radius:var(--r);margin-bottom:7px}
+.sec-icon{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.search-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g700)}
+.leg-swatch{width:14px;height:10px;border-radius:2px;flex-shrink:0}
 
-/* ── LEGEND ── */
-.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray700)}
-.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+/* ── IC CARD ZONE ── */
+.ic-zone{border:2px dashed var(--g300);border-radius:var(--r);padding:14px;text-align:center;background:var(--g50);margin-bottom:10px}
+.ic-zone.reading{border-color:var(--blue);background:var(--blue-lt);animation:pulse 1s ease-in-out infinite}
+.ic-zone.done{border-color:var(--green);background:var(--green-lt)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
 
-/* ── AUDIT ── */
-.audit-row{font-size:11px;font-family:monospace;padding:6px 0;border-bottom:1px solid var(--gray100);color:var(--gray700);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.audit-row:last-child{border-bottom:none}
+/* ── MODE BAR ── */
+.mode-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.mode-bar span{font-size:12px;color:var(--g600)}
 
 /* ── LOGIN ── */
-.login-wrap{max-width:400px;margin:2rem auto}
+.login-wrap{max-width:420px;margin:3rem auto}
+.login-card{background:#fff;border:1px solid var(--g200);border-radius:var(--rlg);padding:2rem;box-shadow:var(--sh2)}
+.login-logo{text-align:center;margin-bottom:1.5rem}
+.login-logo-mark{width:52px;height:52px;border-radius:12px;background:var(--blue);margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
+.login-logo-mark svg{width:28px;height:28px;fill:#fff}
+.login-tabs{display:flex;gap:0;border:1px solid var(--g300);border-radius:var(--r);overflow:hidden;margin-bottom:1.2rem}
+.login-tab{flex:1;padding:9px;font-size:13px;font-weight:500;border:none;background:#fff;cursor:pointer;color:var(--g700);transition:all .15s;text-align:center}
+.login-tab.on{background:var(--blue);color:#fff}
 
-/* ── SEC ITEM ── */
-.sec-item{display:flex;gap:12px;padding:14px;border:1px solid var(--gray200);border-radius:var(--radius);margin-bottom:8px;background:var(--surface)}
-.sec-icon{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+/* ── PT HEADER ── */
+.pt-hd{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fff;border:1px solid var(--g200);border-radius:var(--rlg);margin-bottom:14px}
+.pt-av{width:42px;height:42px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:var(--blue-dk);flex-shrink:0;border:2px solid var(--blue)}
 
-/* ── PATIENT VIEW ── */
-.pt-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--gray200);border-radius:var(--radius-lg)}
-.pt-av{width:44px;height:44px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:var(--blue-dark);flex-shrink:0;border:2px solid var(--blue)}
-
-/* ── TOOTH SVG ── */
-#oral-svg{width:100%;height:auto;cursor:default;display:block}
-.svg-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;justify-content:center}
-#pt-detail-box{display:none;margin-top:14px;border-top:1px solid var(--gray200);padding-top:14px}
-
-/* ── INP TOOTH GRID ── */
-.jaw-lbl{font-size:11px;font-weight:500;color:var(--gray600);margin-bottom:4px;letter-spacing:.02em}
-.tgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:3px}
-
-/* Square tooth cell */
-.tc{aspect-ratio:1;border-radius:3px;border:1px solid var(--gray300);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;transition:all .12s;background:var(--gray50);color:var(--gray600)}
-.tc:hover{transform:scale(1.15);z-index:2;position:relative;box-shadow:var(--shadow)}
-.tc.sel{box-shadow:0 0 0 2.5px var(--blue);z-index:3;position:relative}
-.tc.sh{background:var(--green-light);color:var(--green-dark);border-color:#34A853}
-.tc.sc{background:var(--red-light);color:var(--red-dark);border-color:#EA4335}
-.tc.sr{background:var(--blue-light);color:var(--blue-dark);border-color:#1A73E8}
-.tc.sm{background:var(--gray100);color:var(--gray500);border-color:var(--gray400);border-style:dashed}
-.tc.sp{background:var(--yellow-light);color:var(--yellow-dark);border-color:#FBBC04}
-.tc.so{background:var(--gray100);color:var(--gray600);border-color:var(--gray300)}
-
-/* ── CHIP SECTION TAG ── */
-.section-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.tag-org{background:var(--green-light);color:var(--green-dark)}
-.tag-pat{background:var(--blue-light);color:var(--blue-dark)}
-.tag-obs{background:var(--teal-light);color:var(--teal-dark)}
-.tag-bundle{background:var(--yellow-light);color:var(--yellow-dark)}
-
-/* ── DIVIDER ── */
-.divider{height:1px;background:var(--gray200);margin:16px 0}
-
-/* ── CHIP VISIT DATE ── */
-.visit-date-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:var(--teal-light);color:var(--teal-dark);font-size:11px;font-weight:500}
+/* ══════════════════════════════════
+   PROFESSIONAL SVG TOOTH CHART
+══════════════════════════════════ */
+.dental-chart-wrap{
+  background:#fff;
+  border:1px solid var(--g200);
+  border-radius:var(--rlg);
+  padding:16px 12px 10px;
+  position:relative;
+  overflow:hidden;
+}
+.dental-chart-wrap::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at 50% 100%,rgba(232,240,254,.3) 0%,transparent 70%);
+  pointer-events:none;
+}
+.chart-label{
+  font-size:10px;font-weight:600;color:var(--g500);
+  text-transform:uppercase;letter-spacing:.06em;
+  text-align:center;margin-bottom:4px;
+}
+.chart-label.lower{margin-top:4px;margin-bottom:0}
+.tooth-svg-group{cursor:pointer;transition:transform .12s}
+.tooth-svg-group:hover{transform:scale(1.12);filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
+.tooth-svg-group.selected{filter:drop-shadow(0 0 4px rgba(26,115,232,.7))}
+.midline-divider{stroke:var(--g300);stroke-width:1;stroke-dasharray:4,3}
+.fdi-label{font-family:'JetBrains Mono',monospace;font-size:6px;fill:var(--g500);text-anchor:middle;pointer-events:none}
+.chart-legends{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;padding-top:8px;border-top:1px solid var(--g100)}
 </style>
 </head>
 <body>
 
-<!-- ── TOP BAR ── -->
-<div class="topbar">
-  <div class="topbar-logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 2C6.5 2 4 3.5 4 6c0 1.5.5 2.5 1 3.5.5 1 .5 2.5-.5 4.5h7c-1-2-1-3.5-.5-4.5.5-1 1-2 1-3.5 0-2.5-2.5-4-4-4z" fill="white" opacity=".9"/>
-      </svg>
-    </div>
-    <span class="topbar-title">TW Dental FHIR</span>
-    <span class="topbar-sub">台灣牙科口腔檢查 Profile · 雛形展示</span>
+<!-- ══ TOPBAR ══ -->
+<div class="topbar" id="topbar">
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 3C9.5 3 6 5 6 8.5c0 2 .7 3.5 1.5 5S9 17.5 8 21h8c-1-3.5-1-5 .5-7.5S18 10.5 18 8.5C18 5 14.5 3 12 3z"/></svg></div>
+  <span class="app-title">TW Dental FHIR</span><span class="app-ver">v2</span>
+  <div class="topbar-right" id="topbar-right" style="display:none">
+    <div class="doc-chip" id="doc-chip">👨‍⚕️ 醫師</div>
+    <button class="btn btn-sm" onclick="docLogout()">登出</button>
   </div>
-  <div class="topbar-nav">
-    <button class="tnb on" onclick="goPage('inp')">牙醫師輸入</button>
-    <button class="tnb" onclick="goPage('view')">牙醫師查看</button>
-    <button class="tnb" onclick="goPage('plogin')">病人查看</button>
-    <button class="tnb" onclick="goPage('sec')">資料安全</button>
-    <button class="tnb" onclick="goPage('code')">FHIR 程式碼</button>
-  </div>
+</div>
+
+<!-- ══ NAV ══ -->
+<div class="nav-wrap" id="nav-wrap" style="display:none">
+  <button class="ntb on" onclick="goPage('inp')">牙醫師輸入</button>
+  <button class="ntb" onclick="goPage('view')">牙醫師查看</button>
+  <button class="ntb" onclick="goPage('plogin')">病人查看</button>
+  <button class="ntb" onclick="goPage('sec')">資料安全</button>
+  <button class="ntb" onclick="goPage('code')">FHIR 程式碼</button>
 </div>
 
 <div class="main">
 
-<!-- ══════════════════════════════════════════════
-     PAGE: 醫師輸入
-══════════════════════════════════════════════ -->
-<div class="page active" id="pg-inp">
-  <div class="g3">
+<!-- ══════════════════════════════════════
+  PAGE: 醫師登入
+══════════════════════════════════════ -->
+<div class="page active" id="pg-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 3C9.5 3 6 5 6 8.5c0 2 .7 3.5 1.5 5S9 17.5 8 21h8c-1-3.5-1-5 .5-7.5S18 10.5 18 8.5C18 5 14.5 3 12 3z"/></svg></div>
+        <div style="font-size:18px;font-weight:600">TW Dental FHIR</div>
+        <div style="font-size:13px;color:var(--g600);margin-top:3px">台灣牙科口腔檢查 Profile 展示系統</div>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab on" onclick="switchLoginTab('doc',this)">牙醫師登入</button>
+        <button class="login-tab" onclick="switchLoginTab('pt',this)">病人查閱</button>
+      </div>
 
-    <!-- 左欄：診所 + 病人 + 牙位圖 -->
-    <div>
-      <!-- 診所 -->
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--green)"></div>診所資訊</div>
-        <div class="field"><label>診所名稱</label><input id="org-name" type="text" value="臺中陽光牙醫診所" oninput="updateOrgId()"></div>
-        <div class="field"><label>就診日期</label><input id="visit-date" type="date"></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <span class="org-badge" id="org-id">ORG-000000</span>
-          <span style="font-size:11px;color:var(--gray600)">Organization ID（FHIR）</span>
+      <!-- 醫師登入 -->
+      <div id="lt-doc">
+        <div class="field">
+          <label>醫師執照號碼</label>
+          <input id="li-lic" type="text" placeholder="例：1234567" maxlength="10">
+          <div class="hint">輸入衛生福利部核發之執照號碼</div>
+        </div>
+        <div class="field">
+          <label>姓名</label>
+          <input id="li-name" type="text" placeholder="醫師姓名">
+        </div>
+        <div class="field">
+          <label>所屬診所</label>
+          <input id="li-clinic" type="text" placeholder="臺中陽光牙醫診所" value="臺中陽光牙醫診所">
+        </div>
+        <button class="btn btn-prim btn-full" style="font-size:14px;padding:11px" onclick="docLogin()">登入診療系統</button>
+        <div class="toast tor" id="li-err" style="margin-top:8px">請填寫執照號碼與姓名</div>
+        <div style="margin-top:14px;padding:10px;background:var(--blue-lt);border-radius:var(--r);font-size:11px;color:var(--blue-dk)">
+          <b>Demo：</b>任意輸入執照號碼 + 姓名即可登入
         </div>
       </div>
 
-      <!-- 病人 -->
+      <!-- 病人快速入口 -->
+      <div id="lt-pt" style="display:none">
+        <div class="field"><label>姓名</label><input id="pl-name" type="text" placeholder="王小明"></div>
+        <div class="field">
+          <label>身分證號</label>
+          <input id="pl-id" type="text" placeholder="A123456789" maxlength="10">
+        </div>
+        <button class="btn btn-prim btn-full" style="padding:11px;font-size:14px" onclick="ptLogin()">查看我的牙齒狀況</button>
+        <div class="toast tor" id="pl-err" style="margin-top:8px">查無資料，請確認姓名與身分證號</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  PAGE: 醫師輸入
+══════════════════════════════════════ -->
+<div class="page" id="pg-inp">
+  <div class="g3">
+    <!-- 左：診所 + 病人 + 牙位圖 -->
+    <div>
       <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>病人資訊</div>
+        <div class="card-hd"><div class="dot" style="background:var(--green)"></div>診所 &amp; 就診</div>
+        <div class="field"><label>診所名稱</label><input id="org-name" type="text" value="" oninput="updateOrgId()"></div>
+        <div class="field"><label>就診日期</label><input id="visit-date" type="date"></div>
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+          <span class="org-badge" id="org-id">ORG-000000</span>
+          <span style="font-size:11px;color:var(--g600)">Organization ID</span>
+        </div>
+      </div>
+
+      <!-- 健保 IC 卡讀取 -->
+      <div class="card">
+        <div class="card-hd"><div class="dot" style="background:var(--teal)"></div>健保 IC 卡讀取</div>
+        <div class="ic-zone" id="ic-zone">
+          <div style="font-size:13px;font-weight:500;color:var(--g600)">🪪 健保 IC 卡插卡區</div>
+          <div style="font-size:11px;color:var(--g500);margin-top:3px">實際環境連接讀卡機 API</div>
+        </div>
+        <button class="btn btn-full" onclick="simulateIC()" style="margin-top:0">模擬讀卡（Demo）</button>
+        <div class="toast tok" id="ic-toast">✓ 已讀取健保卡資料</div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="dot" style="background:var(--blue)"></div>病人資訊</div>
         <div class="g2">
           <div class="field"><label>姓名</label><input id="pt-name" type="text" placeholder="王小明"></div>
-          <div class="field"><label>身分證號</label><input id="pt-idnum" type="text" placeholder="A123456789" oninput="updatePid()"></div>
+          <div class="field">
+            <label>身分證號</label>
+            <input id="pt-idnum" type="text" placeholder="A123456789" maxlength="10" oninput="updatePid()">
+          </div>
           <div class="field"><label>生日</label><input id="pt-dob" type="date"></div>
-          <div class="field"><label>健保狀態</label><select id="pt-ins"><option value="active">健保 · 有效</option><option value="self">自費</option></select></div>
+          <div class="field"><label>健保</label><select id="pt-ins"><option value="active">健保·有效</option><option value="self">自費</option></select></div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
           <span class="pid-badge" id="auto-pid">PID—</span>
-          <span style="font-size:11px;color:var(--gray600)">Patient ID（FHIR · 自動產生）</span>
+          <span style="font-size:11px;color:var(--g600)">Patient ID（自動產生）</span>
         </div>
       </div>
 
-      <!-- 牙位圖 (小格) -->
+      <!-- 牙位模式切換 + 專業 SVG 圖 -->
       <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--teal)"></div>點選牙位</div>
-        <div class="jaw-lbl">上顎 ── 右 → 左</div>
-        <div class="tgrid" id="inp-upper"></div>
-        <div class="jaw-lbl" style="margin-top:8px">下顎 ── 右 → 左</div>
-        <div class="tgrid" id="inp-lower"></div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
-          <div class="leg"><div class="leg-dot" style="background:var(--green-light);border:1px solid #34A853"></div>健康</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--red-light);border:1px solid #EA4335"></div>蛀牙</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--blue-light);border:1px solid #1A73E8"></div>已填補</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--gray100);border:1px dashed var(--gray400)"></div>缺牙</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--yellow-light);border:1px solid #FBBC04"></div>牙周</div>
+        <div class="card-hd"><div class="dot" style="background:var(--teal)"></div>點選牙位</div>
+        <div class="mode-bar">
+          <span>模式：</span>
+          <button class="btn-mode on" id="mode-adult" onclick="setMode('adult')">成人牙</button>
+          <button class="btn-mode" id="mode-baby" onclick="setMode('baby')">乳牙</button>
+          <button class="btn-mode" id="mode-mixed" onclick="setMode('mixed')">混合齒列</button>
         </div>
+        <div id="inp-arch-wrap"></div>
       </div>
     </div>
 
-    <!-- 中欄：輸入表單 -->
+    <!-- 中：輸入表單 -->
     <div>
       <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>檢查記錄</div>
-        <div id="inp-hint" style="padding:2.5rem 0;text-align:center;font-size:13px;color:var(--gray500)">
-          <div style="font-size:32px;margin-bottom:8px">🦷</div>
-          點選左側牙位開始記錄
+        <div class="card-hd"><div class="dot" style="background:var(--blue)"></div>檢查記錄</div>
+        <div id="inp-hint" style="padding:2.5rem 0;text-align:center;font-size:13px;color:var(--g500)">
+          <div style="font-size:36px;margin-bottom:8px">🦷</div>點選左側牙位開始記錄
         </div>
         <div id="inp-form" style="display:none">
-          <!-- 牙位標題 -->
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
-              <div style="font-size:16px;font-weight:500" id="inp-lbl"></div>
-              <div style="font-size:11px;color:var(--gray600);margin-top:2px" id="inp-fdi-label"></div>
+              <div style="font-size:16px;font-weight:600" id="inp-lbl"></div>
+              <div style="font-size:11px;color:var(--g600);margin-top:2px;font-family:'JetBrains Mono',monospace" id="inp-fdi-sub"></div>
             </div>
             <span id="inp-spill"></span>
           </div>
 
-          <!-- 歷史紀錄 -->
           <div class="hist-panel" id="inp-hist-panel">
-            <div class="hist-title">此牙位的歷史紀錄</div>
+            <div class="hist-title">此牙位歷史紀錄</div>
             <div id="inp-hist"><div class="hist-empty">尚無紀錄</div></div>
           </div>
 
-          <!-- 狀態 -->
-          <div class="field"><label>牙齒狀態</label>
+          <div class="field"><label>狀態</label>
             <div class="st-grid">
               <button class="st-btn" data-v="h" onclick="setS('h')">✓ 健康</button>
               <button class="st-btn" data-v="c" onclick="setS('c')">● 蛀牙</button>
               <button class="st-btn" data-v="r" onclick="setS('r')">◆ 已填補</button>
               <button class="st-btn" data-v="m" onclick="setS('m')">○ 缺牙</button>
-              <button class="st-btn" data-v="p" onclick="setS('p')">▲ 牙周問題</button>
+              <button class="st-btn" data-v="p" onclick="setS('p')">▲ 牙周</button>
               <button class="st-btn" data-v="o" onclick="setS('o')">— 其他</button>
             </div>
           </div>
-
-          <!-- 牙面 -->
-          <div id="f-surf" class="field" style="display:none"><label>牙面（可多選）</label>
+          <div id="f-surf" class="field" style="display:none"><label>牙面</label>
             <div class="surf-wrap">
               <button class="sf-btn" data-v="M" onclick="this.classList.toggle('on')">M 近中</button>
               <button class="sf-btn" data-v="O" onclick="this.classList.toggle('on')">O 咬合</button>
@@ -327,8 +396,6 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%
               <button class="sf-btn" data-v="L" onclick="this.classList.toggle('on')">L 舌側</button>
             </div>
           </div>
-
-          <!-- 材料 -->
           <div id="f-mat" class="field" style="display:none"><label>填補材料</label>
             <select id="inp-mat">
               <option>複合樹脂 89013C</option><option>銀粉（汞齊合金）89001C</option>
@@ -340,298 +407,215 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%
               <option>氟化物塗料 Fluoride Varnish</option><option>牙本質黏合系統 DBA</option>
             </select>
           </div>
-
-          <!-- 探針深度 -->
           <div id="f-dep" class="field" style="display:none"><label>探針深度（mm）</label>
             <div style="display:flex;align-items:center;gap:8px">
               <input id="inp-dep" type="number" min="1" max="12" step="0.5" value="3.5" style="width:90px">
-              <span style="font-size:12px;color:var(--gray600)">正常 ≤ 3mm，3–5mm 注意，≥5mm 需治療</span>
+              <span style="font-size:11px;color:var(--g600)">≤3 正常 · 3–5 注意 · ≥5 需治療</span>
             </div>
           </div>
-
-          <!-- 備註 -->
-          <div class="field"><label>醫師備註</label>
-            <textarea id="inp-note" rows="2" placeholder="補充說明（選填）"></textarea>
-          </div>
-
-          <!-- X 光 -->
+          <div class="field"><label>醫師備註</label><textarea id="inp-note" rows="2" placeholder="補充說明（選填）"></textarea></div>
           <div class="field">
-            <label>X 光圖（附掛至此牙位）</label>
+            <label>X 光圖</label>
             <div class="xray-zone" id="xray-zone">
               <input type="file" accept="image/*" id="xray-file" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadXray(event)">
               <div id="xray-ph" style="pointer-events:none">
-                <div style="font-size:13px;font-weight:500;color:var(--gray600)">點擊上傳 X 光圖</div>
-                <div style="font-size:11px;color:var(--gray500);margin-top:3px">JPG / PNG / DICOM 預覽</div>
+                <div style="font-size:13px;font-weight:500;color:var(--g600)">點擊上傳 X 光圖</div>
+                <div style="font-size:11px;color:var(--g500);margin-top:3px">JPG / PNG / DICOM 預覽</div>
               </div>
               <img id="xray-img" class="xray-preview">
-              <div id="xray-info" style="display:none;font-size:11px;color:var(--green-dark);font-weight:500;margin-top:5px"></div>
+              <div id="xray-info" style="display:none;font-size:11px;color:var(--green-dk);font-weight:500;margin-top:5px"></div>
             </div>
           </div>
-
           <button class="btn btn-prim btn-full" onclick="saveObs()">儲存此牙位 Observation</button>
-          <div class="toast tok" id="t-obs">✓ 已儲存 Observation</div>
+          <div class="toast tok" id="t-obs">✓ 已儲存</div>
         </div>
       </div>
-
-      <!-- 本次已記錄 -->
       <div class="card" id="saved-card" style="display:none">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--green)"></div>本次已記錄</div>
+        <div class="card-hd"><div class="dot" style="background:var(--green)"></div>本次已記錄</div>
         <div id="saved-list"></div>
-        <button class="btn btn-prim btn-full" onclick="commitPt()">完成並儲存病人資料至 FHIR</button>
-        <div class="toast tob" id="t-commit">✓ 已儲存，可在查看端與病人端查閱</div>
+        <button class="btn btn-prim btn-full" onclick="commitPt()">完成並儲存至 FHIR（localStorage）</button>
+        <div class="toast tob" id="t-commit">✓ 已儲存，可在查看端查閱</div>
       </div>
     </div>
 
-    <!-- 右欄：記事本 -->
+    <!-- 右：記事本 -->
     <div>
       <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--yellow)"></div>FHIR 記事本</div>
-
-        <!-- Organization -->
-        <div class="nb-section">
-          <div class="nb-header">
-            <span class="section-tag tag-org">Organization</span>
-            <button class="copy-btn" onclick="copyNb('nb-org-json')">複製</button>
-          </div>
+        <div class="card-hd"><div class="dot" style="background:var(--yellow)"></div>FHIR 記事本</div>
+        <div class="nb-sec">
+          <div class="nb-hd"><span class="nb-hd-tag tag-org">Organization</span><button class="copy-btn" onclick="copyEl('nb-org-j')">複製</button></div>
           <div class="nb-body">
-            <div class="nb-id-row">
-              <span class="nb-id-label">診所 ID</span>
-              <span class="org-badge" id="nb-org-id-show">ORG-000000</span>
-              <span style="font-size:11px;color:var(--gray600)" id="nb-org-name-show">臺中陽光牙醫診所</span>
-            </div>
-            <div class="fhir-code" id="nb-org-json" style="max-height:70px;font-size:10px">尚未建立</div>
+            <div class="nb-id-row"><span class="org-badge" id="nb-org-id">ORG-000000</span><span style="font-size:11px;color:var(--g600)" id="nb-org-name">—</span></div>
+            <div class="fhir-code" id="nb-org-j" style="max-height:65px">尚未建立</div>
           </div>
         </div>
-
-        <!-- Patient -->
-        <div class="nb-section">
-          <div class="nb-header">
-            <span class="section-tag tag-pat">Patient</span>
-            <button class="copy-btn" onclick="copyNb('nb-pat-json')">複製</button>
-          </div>
+        <div class="nb-sec">
+          <div class="nb-hd"><span class="nb-hd-tag tag-pat">Patient</span><button class="copy-btn" onclick="copyEl('nb-pat-j')">複製</button></div>
           <div class="nb-body">
-            <div class="nb-id-row">
-              <span class="nb-id-label">病人 ID</span>
-              <span class="pid-badge" id="nb-pat-id-show">PID—</span>
-              <span style="font-size:11px;color:var(--gray600)" id="nb-pat-name-show">尚未輸入</span>
-            </div>
-            <div class="fhir-code" id="nb-pat-json" style="max-height:70px;font-size:10px">尚未建立</div>
+            <div class="nb-id-row"><span class="pid-badge" id="nb-pat-id">PID—</span><span style="font-size:11px;color:var(--g600)" id="nb-pat-name">尚未輸入</span></div>
+            <div class="fhir-code" id="nb-pat-j" style="max-height:65px">尚未建立</div>
           </div>
         </div>
-
-        <!-- Observations -->
-        <div class="nb-section">
-          <div class="nb-header">
-            <span class="section-tag tag-obs">Observation</span>
-            <span style="font-size:11px;color:var(--gray600)" id="nb-obs-count">0 筆</span>
-          </div>
-          <div class="nb-body">
-            <div class="fhir-code" id="nb-obs-json" style="max-height:100px;font-size:10px">尚無記錄</div>
-          </div>
+        <div class="nb-sec">
+          <div class="nb-hd"><span class="nb-hd-tag tag-obs">Observation</span><span style="font-size:11px;color:var(--g600)" id="nb-obs-cnt">0 筆</span></div>
+          <div class="nb-body"><div class="fhir-code" id="nb-obs-j" style="max-height:90px">尚無記錄</div></div>
         </div>
-
-        <!-- Bundle -->
-        <div class="nb-section">
-          <div class="nb-header">
-            <span class="section-tag tag-bundle">Bundle</span>
-            <button class="copy-btn" onclick="copyNb('nb-bundle-json')">複製 Bundle</button>
-          </div>
-          <div class="nb-body">
-            <div class="fhir-code" id="nb-bundle-json" style="max-height:100px;font-size:10px">// 儲存後產生</div>
-          </div>
+        <div class="nb-sec">
+          <div class="nb-hd"><span class="nb-hd-tag tag-bun">Bundle</span><button class="copy-btn" onclick="copyEl('nb-bun-j')">複製</button></div>
+          <div class="nb-body"><div class="fhir-code" id="nb-bun-j" style="max-height:90px">// 儲存後產生</div></div>
         </div>
       </div>
+      <div class="card">
+        <div class="card-hd"><div class="dot" style="background:var(--g400)"></div>已儲存病人（localStorage）</div>
+        <div id="db-list" style="font-size:12px;color:var(--g600)">尚無資料</div>
+        <button class="btn btn-sm" style="margin-top:8px;color:var(--red-dk)" onclick="clearDB()">清除所有資料</button>
+      </div>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PAGE: 醫師查看
-══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+  PAGE: 醫師查看
+══════════════════════════════════════ -->
 <div class="page" id="pg-view">
   <div class="card">
-    <div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>病人查詢</div>
+    <div class="card-hd"><div class="dot" style="background:var(--blue)"></div>病人查詢</div>
     <div class="search-row">
-      <input id="srch" type="text" placeholder="PID · 身分證號 · 姓名" style="flex:1;min-width:160px">
+      <input id="srch" type="text" placeholder="PID · 身分證號 · 姓名" style="flex:1;min-width:140px">
       <button class="btn btn-prim" onclick="doSearch()">查詢</button>
-      <select id="pt-sel" onchange="loadPt(this.value)" style="flex:1;min-width:180px">
-        <option value="">— 從清單選擇 —</option>
-      </select>
+      <select id="pt-sel" onchange="loadPt(this.value)" style="flex:1;min-width:160px"><option value="">— 清單選擇 —</option></select>
     </div>
-    <div style="color:var(--red-dark);font-size:12px;display:none" id="srch-err">查無此病人，請確認查詢條件</div>
+    <div style="color:var(--red-dk);font-size:12px;display:none" id="srch-err">查無此病人</div>
   </div>
-
   <div id="view-body" style="display:none">
-    <!-- 病人資訊列 -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;padding:14px 18px;background:var(--surface);border:1px solid var(--gray200);border-radius:var(--radius-lg)">
-      <div style="width:40px;height:40px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-weight:500;color:var(--blue-dark);font-size:15px;flex-shrink:0;border:2px solid var(--blue)" id="v-av"></div>
+    <div class="pt-hd">
+      <div class="pt-av" id="v-av"></div>
       <div>
-        <span id="v-name" style="font-size:16px;font-weight:500"></span>
+        <div style="font-size:15px;font-weight:600" id="v-name"></div>
         <div style="margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="pid-badge" id="v-pid"></span>
           <span class="org-badge" id="v-org"></span>
-          <span class="visit-date-chip" id="v-date"></span>
+          <span style="font-size:11px;color:var(--g600)" id="v-meta"></span>
         </div>
       </div>
-      <div style="margin-left:auto;font-size:12px;color:var(--gray600)" id="v-meta"></div>
     </div>
-
-    <!-- 統計 -->
-    <div class="g4" style="margin-bottom:16px" id="v-stats"></div>
-
+    <div class="g4" style="margin-bottom:14px" id="v-stats"></div>
     <div class="g2">
-      <!-- 牙位圖 + 詳情 -->
       <div>
         <div class="card">
-          <div class="card-hd"><div class="card-hd-dot" style="background:var(--teal)"></div>牙位圖</div>
-          <div class="jaw-lbl">上顎</div><div class="tgrid" id="v-upper"></div>
-          <div class="jaw-lbl" style="margin-top:8px">下顎</div><div class="tgrid" id="v-lower"></div>
-          <div id="v-detail" style="display:none;margin-top:14px;border-top:1px solid var(--gray200);padding-top:14px"></div>
+          <div class="card-hd"><div class="dot" style="background:var(--teal)"></div>牙位圖</div>
+          <div id="v-arch-wrap"></div>
+          <div id="v-detail" style="display:none;margin-top:12px;border-top:1px solid var(--g200);padding-top:12px"></div>
         </div>
-
-        <!-- 醫師查看端的記事本 -->
         <div class="card">
-          <div class="card-hd"><div class="card-hd-dot" style="background:var(--yellow)"></div>FHIR 記事本</div>
-          <div class="nb-section">
-            <div class="nb-header"><span class="section-tag tag-org">Organization</span></div>
-            <div class="nb-body"><div class="fhir-code" id="v-nb-org" style="max-height:60px;font-size:10px">—</div></div>
-          </div>
-          <div class="nb-section">
-            <div class="nb-header"><span class="section-tag tag-pat">Patient</span></div>
-            <div class="nb-body">
-              <div class="nb-id-row" style="margin-bottom:6px">
-                <span class="nb-id-label">病人 ID</span>
-                <span class="pid-badge" id="v-nb-pid">—</span>
-              </div>
-              <div class="fhir-code" id="v-nb-pat" style="max-height:60px;font-size:10px">—</div>
-            </div>
-          </div>
-          <div class="nb-section">
-            <div class="nb-header"><span class="section-tag tag-bundle">Bundle</span><button class="copy-btn" onclick="copyNb('v-nb-bundle')">複製</button></div>
-            <div class="nb-body"><div class="fhir-code" id="v-nb-bundle" style="max-height:80px;font-size:10px">—</div></div>
-          </div>
+          <div class="card-hd"><div class="dot" style="background:var(--yellow)"></div>FHIR 記事本</div>
+          <div class="nb-sec"><div class="nb-hd"><span class="nb-hd-tag tag-org">Organization</span></div><div class="nb-body"><div class="fhir-code" id="v-nb-org" style="max-height:55px">—</div></div></div>
+          <div class="nb-sec"><div class="nb-hd"><span class="nb-hd-tag tag-pat">Patient</span></div><div class="nb-body"><div class="nb-id-row"><span class="pid-badge" id="v-nb-pid">—</span></div><div class="fhir-code" id="v-nb-pat" style="max-height:55px">—</div></div></div>
+          <div class="nb-sec"><div class="nb-hd"><span class="nb-hd-tag tag-bun">Bundle</span><button class="copy-btn" onclick="copyEl('v-nb-bun')">複製</button></div><div class="nb-body"><div class="fhir-code" id="v-nb-bun" style="max-height:75px">—</div></div></div>
         </div>
       </div>
-
-      <!-- Observation 清單 -->
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>Observation 清單</div>
-        <div id="v-list"></div>
-      </div>
+      <div class="card"><div class="card-hd"><div class="dot" style="background:var(--blue)"></div>Observation 清單</div><div id="v-list"></div></div>
     </div>
   </div>
-  <div id="view-empty" style="padding:4rem;text-align:center;color:var(--gray500);font-size:13px">
-    <div style="font-size:36px;margin-bottom:12px">🔍</div>
-    請輸入查詢條件
-  </div>
+  <div id="view-empty" style="padding:4rem;text-align:center;color:var(--g500);font-size:13px"><div style="font-size:36px;margin-bottom:10px">🔍</div>請輸入查詢條件</div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PAGE: 病人登入
-══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+  PAGE: 病人查看
+══════════════════════════════════════ -->
 <div class="page" id="pg-plogin">
   <div class="login-wrap">
-    <div class="card" style="padding:2rem">
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <div style="font-size:40px;margin-bottom:8px">🦷</div>
-        <div style="font-size:20px;font-weight:500;color:var(--gray900)">牙齒健康紀錄</div>
-        <div style="font-size:13px;color:var(--gray600);margin-top:4px">輸入您的資料查看口腔檢查結果</div>
+    <div class="login-card">
+      <div style="font-size:18px;font-weight:600;margin-bottom:4px;text-align:center">牙齒健康紀錄</div>
+      <div style="font-size:13px;color:var(--g600);margin-bottom:1.2rem;text-align:center">輸入資料查看口腔檢查結果</div>
+      <div class="field"><label>姓名</label><input id="pl2-name" type="text" placeholder="王小明"></div>
+      <div class="field">
+        <label>身分證號</label>
+        <input id="pl2-id" type="text" placeholder="A123456789" maxlength="10">
       </div>
-      <div class="field"><label>姓名</label><input id="pl-name" type="text" placeholder="王小明"></div>
-      <div class="field"><label>身分證號</label><input id="pl-id" type="text" placeholder="A123456789"></div>
-      <button class="btn btn-prim btn-full" style="padding:12px;font-size:14px" onclick="ptLogin()">查看我的牙齒狀況</button>
-      <div style="color:var(--red-dark);font-size:12px;margin-top:8px;display:none" id="pl-err">查無資料，請確認姓名與身分證號</div>
-      <div style="margin-top:1.25rem;padding:12px;background:var(--gray50);border-radius:var(--radius);border:1px solid var(--gray200)">
-        <div style="font-size:11px;font-weight:500;color:var(--gray800);margin-bottom:4px">資料安全說明</div>
-        <div style="font-size:11px;color:var(--gray600);line-height:1.7">受 SMART on FHIR OAuth 2.0 保護。所有傳輸經 TLS 1.3 加密，存取紀錄完整保存於 AuditEvent。</div>
-      </div>
-
-      <div style="margin-top:1rem;padding:10px;background:var(--blue-light);border-radius:var(--radius);border:1px solid var(--blue)">
-        <div style="font-size:11px;font-weight:500;color:var(--blue-dark);margin-bottom:3px">Demo 測試帳號</div>
-        <div style="font-size:11px;color:var(--blue-dark)">請先在「牙醫師輸入」頁面新增病人，再用該姓名與身分證號登入。</div>
-      </div>
+      <button class="btn btn-prim btn-full" style="padding:11px" onclick="ptLogin2()">查看我的牙齒狀況</button>
+      <div class="toast tor" id="pl2-err-toast" style="margin-top:8px">查無資料</div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PAGE: 病人查看
-══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+  PAGE: 病人查看結果
+══════════════════════════════════════ -->
 <div class="page" id="pg-ptview">
-  <div class="pt-header">
+  <div class="pt-hd">
     <div class="pt-av" id="pt-av"></div>
     <div>
-      <div id="pt-greet" style="font-size:16px;font-weight:500"></div>
-      <div id="pt-meta2" style="font-size:12px;color:var(--gray600);margin-top:2px"></div>
+      <div id="pt-greet" style="font-size:15px;font-weight:600"></div>
+      <div id="pt-meta2" style="font-size:12px;color:var(--g600);margin-top:2px"></div>
     </div>
     <button class="btn btn-sm" onclick="ptLogout()" style="margin-left:auto">登出</button>
   </div>
-
-  <div class="g4" style="margin-bottom:16px" id="pt-stats"></div>
-
-  <!-- 擬真牙齒解剖圖 -->
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-hd"><div class="card-hd-dot" style="background:var(--teal)"></div>口腔解剖圖 · 點擊牙齒查看說明</div>
-    <svg id="oral-svg" viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"></svg>
-    <div class="svg-legend" id="svg-legend"></div>
-    <div id="pt-detail-box"></div>
+  <div class="g4" style="margin-bottom:14px" id="pt-stats"></div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hd"><div class="dot" style="background:var(--teal)"></div>口腔解剖圖 · 點擊牙齒查看說明</div>
+    <div class="mode-bar" style="margin-bottom:8px">
+      <span>模式：</span>
+      <button class="btn-mode on" id="pt-mode-adult" onclick="setPtMode('adult')">成人牙</button>
+      <button class="btn-mode" id="pt-mode-baby" onclick="setPtMode('baby')">乳牙</button>
+    </div>
+    <div id="pt-arch-wrap"></div>
+    <div id="pt-detail-box" style="margin-top:12px;border-top:1px solid var(--g200);padding-top:12px;display:none"></div>
   </div>
-
   <div class="g2">
-    <div class="card"><div class="card-hd"><div class="card-hd-dot" style="background:var(--red)"></div>需要注意</div><div id="pt-alerts"></div></div>
-    <div class="card"><div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>就診紀錄</div><div id="pt-tl"></div></div>
+    <div class="card"><div class="card-hd"><div class="dot" style="background:var(--red)"></div>需要注意</div><div id="pt-alerts"></div></div>
+    <div class="card"><div class="card-hd"><div class="dot" style="background:var(--blue)"></div>就診紀錄</div><div id="pt-tl"></div></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PAGE: 資料安全
-══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+  PAGE: 資料安全
+══════════════════════════════════════ -->
 <div class="page" id="pg-sec">
-  <div style="font-size:20px;font-weight:500;margin-bottom:20px;color:var(--gray900)">資料安全架構</div>
-  <div class="g2" style="margin-bottom:16px">
+  <div style="font-size:19px;font-weight:600;margin-bottom:18px">資料安全架構</div>
+  <div class="g2" style="margin-bottom:14px">
     <div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--blue-light)">🔐</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">SMART on FHIR OAuth 2.0</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">病人須明確授權，Access Token 15 分鐘短效，搭配 Refresh Token。未授權診所無法讀取跨院資料。</div></div></div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--green-light)">🔒</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">TLS 1.3 全程加密</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">所有 FHIR API 傳輸均經 TLS 1.3 加密，禁止明文 HTTP，EV SSL 憑證每 90 天自動更新。</div></div></div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--yellow-light)">🛡</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Patient ID 與身分資料分離</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">系統內部僅流通 PID，身分證號加密儲存於獨立資料庫，不隨 FHIR 資源流通。</div></div></div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--red-light)">🔍</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">AuditEvent 存取稽核</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">每筆資料讀寫均產生 FHIR AuditEvent，記錄操作者、時間、IP、動作，保存 7 年。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--blue-lt)">🔐</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">SMART on FHIR OAuth 2.0</div><div style="font-size:12px;color:var(--g600);line-height:1.6">病人須明確授權，Access Token 15 分鐘短效。未授權診所無法讀取跨院資料。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--green-lt)">🔒</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">TLS 1.3 全程加密</div><div style="font-size:12px;color:var(--g600);line-height:1.6">所有 FHIR API 傳輸均經 TLS 1.3 加密，EV SSL 憑證每 90 天自動更新。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--yellow-lt)">🛡</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Patient ID 與身分資料分離</div><div style="font-size:12px;color:var(--g600);line-height:1.6">系統僅流通 PID，身分證號加密儲存於獨立資料庫。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--red-lt)">🔍</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">AuditEvent 稽核</div><div style="font-size:12px;color:var(--g600);line-height:1.6">每筆資料讀寫均產生 FHIR AuditEvent，保存 7 年。</div></div></div>
     </div>
     <div>
-      <div class="sec-item"><div class="sec-icon" style="background:#EDE7F6">📋</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Consent resource 授權管理</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">病人可透過 FHIR Consent 細粒度管理：哪間診所可讀、哪類資料可存取、有效期限設定。</div></div></div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--green-light)">🏥</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">Organization 隔離</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">每間診所有唯一 ORG ID，A 診所預設無法讀 B 診所建立的紀錄，除非病人明確授權。</div></div></div>
-      <div class="sec-item"><div class="sec-icon" style="background:var(--yellow-light)">🔑</div><div><div style="font-size:13px;font-weight:500;margin-bottom:4px">meta.security 機敏標記</div><div style="font-size:12px;color:var(--gray600);line-height:1.6">每筆 Observation 加 meta.security 標記，機敏資料需額外授權才能讀取。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:#EDE7F6">📋</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Consent resource 授權管理</div><div style="font-size:12px;color:var(--g600);line-height:1.6">病人可透過 FHIR Consent 細粒度管理哪間診所可讀、有效期限設定。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--green-lt)">🏥</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Organization 隔離</div><div style="font-size:12px;color:var(--g600);line-height:1.6">每間診所有唯一 ORG ID，A 診所預設無法讀 B 診所建立的紀錄。</div></div></div>
+      <div class="sec-item"><div class="sec-icon" style="background:var(--yellow-lt)">💾</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">localStorage 本地持久化（Demo）</div><div style="font-size:12px;color:var(--g600);line-height:1.6">Demo 環境使用 localStorage 持久化，關閉瀏覽器資料仍保留。</div></div></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-hd"><div class="card-hd-dot" style="background:var(--red)"></div>AuditEvent 模擬記錄</div>
-    <div style="background:var(--gray50);border-radius:var(--radius);padding:12px;border:1px solid var(--gray200)">
-      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--gray500)">2026-04-05 10:32:01</span><span class="pill pr">READ</span><span>Patient/PID20260405001 · 臺中陽光牙醫 · 192.168.1.42</span></div>
-      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--gray500)">2026-04-05 10:32:08</span><span class="pill ph">CREATE</span><span>Observation/obs-001 · FDI 26 · 蛀牙</span></div>
-      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--gray500)">2026-04-05 10:33:15</span><span class="pill ph">CREATE</span><span>Media/xray-001 · X光圖附掛 Observation/obs-001</span></div>
-      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--gray500)">2026-04-05 11:05:44</span><span class="pill pr">READ</span><span>Patient/PID20260405001 · 病人自行存取 · SMART on FHIR</span></div>
-      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--gray500)">2026-04-05 14:20:03</span><span class="pill pc">DENY</span><span>未授權診所嘗試存取 · 已拒絕 · 203.72.xx.xx</span></div>
+    <div class="card-hd"><div class="dot" style="background:var(--red)"></div>AuditEvent 模擬</div>
+    <div style="background:var(--g50);border-radius:var(--r);padding:11px;border:1px solid var(--g200)">
+      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--g500)">2026-04-05 10:32:01</span><span class="pill pr">READ</span><span>Patient/PID001 · 臺中陽光牙醫 · 192.168.1.42</span></div>
+      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--g500)">2026-04-05 10:32:08</span><span class="pill ph">CREATE</span><span>Observation/obs-001 · FDI 26 · 蛀牙</span></div>
+      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--g500)">2026-04-05 11:05:44</span><span class="pill pr">READ</span><span>Patient/PID001 · 病人自行存取 · SMART on FHIR</span></div>
+      <div class="audit-row"><span style="width:145px;flex-shrink:0;color:var(--g500)">2026-04-05 14:20:03</span><span class="pill pc">DENY</span><span>未授權診所嘗試存取 · 已拒絕 · 203.72.xx.xx</span></div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PAGE: FHIR 程式碼
-══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+  PAGE: FHIR 程式碼
+══════════════════════════════════════ -->
 <div class="page" id="pg-code">
-  <div class="card"><div class="card-hd"><div class="card-hd-dot" style="background:var(--blue)"></div>StructureDefinition — TWDentalObservation</div><div class="fhir-code" id="c-struct"></div></div>
-  <div class="card"><div class="card-hd"><div class="card-hd-dot" style="background:var(--green)"></div>CodeSystem — TW Dental Material（14 種填補材料）</div><div class="fhir-code" id="c-code"></div></div>
-  <div class="card"><div class="card-hd"><div class="card-hd-dot" style="background:var(--yellow)"></div>資料庫 Bundle 預覽</div><div class="fhir-code" id="c-bundle"></div></div>
+  <div class="card"><div class="card-hd"><div class="dot" style="background:var(--blue)"></div>StructureDefinition — TWDentalObservation</div><div class="fhir-code" id="c-struct"></div></div>
+  <div class="card"><div class="card-hd"><div class="dot" style="background:var(--green)"></div>CodeSystem — TW Dental Material</div><div class="fhir-code" id="c-code"></div></div>
+  <div class="card"><div class="card-hd"><div class="dot" style="background:var(--yellow)"></div>Bundle 預覽</div><div class="fhir-code" id="c-bundle"></div></div>
 </div>
 
 </div><!-- end .main -->
 
-<!-- ════════════════════════════════════════════════════════
-     SCRIPT
-════════════════════════════════════════════════════════ -->
 <script>
-// ── CONSTANTS ──
+// ══════════════════════════
+//  CONSTANTS
+// ══════════════════════════
 const FDI_U=['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'];
 const FDI_L=['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'];
+const BABY_U=['55','54','53','52','51','61','62','63','64','65'];
+const BABY_L=['85','84','83','82','81','71','72','73','74','75'];
 const NAMES={
   '11':'右上中門齒','12':'右上側門齒','13':'右上犬齒','14':'右上第一小臼齒','15':'右上第二小臼齒',
   '16':'右上第一大臼齒','17':'右上第二大臼齒','18':'右上第三大臼齒',
@@ -640,116 +624,536 @@ const NAMES={
   '31':'左下中門齒','32':'左下側門齒','33':'左下犬齒','34':'左下第一小臼齒','35':'左下第二小臼齒',
   '36':'左下第一大臼齒','37':'左下第二大臼齒','38':'左下第三大臼齒',
   '41':'右下中門齒','42':'右下側門齒','43':'右下犬齒','44':'右下第一小臼齒','45':'右下第二小臼齒',
-  '46':'右下第一大臼齒','47':'右下第二大臼齒','48':'右下第三大臼齒'
-};
-
-// Tooth type: i=incisor, c=canine, p=premolar, m=molar
-const TOOTH_TYPE={
-  '11':'i','12':'i','13':'c','14':'p','15':'p','16':'m','17':'m','18':'m',
-  '21':'i','22':'i','23':'c','24':'p','25':'p','26':'m','27':'m','28':'m',
-  '31':'i','32':'i','33':'c','34':'p','35':'p','36':'m','37':'m','38':'m',
-  '41':'i','42':'i','43':'c','44':'p','45':'p','46':'m','47':'m','48':'m'
+  '46':'右下第一大臼齒','47':'右下第二大臼齒','48':'右下第三大臼齒',
+  '51':'右上乳中門齒','52':'右上乳側門齒','53':'右上乳犬齒','54':'右上第一乳臼齒','55':'右上第二乳臼齒',
+  '61':'左上乳中門齒','62':'左上乳側門齒','63':'左上乳犬齒','64':'左上第一乳臼齒','65':'左上第二乳臼齒',
+  '71':'左下乳中門齒','72':'左下乳側門齒','73':'左下乳犬齒','74':'左下第一乳臼齒','75':'左下第二乳臼齒',
+  '81':'右下乳中門齒','82':'右下乳側門齒','83':'右下乳犬齒','84':'右下第一乳臼齒','85':'右下第二乳臼齒'
 };
 
 const S={
-  h:{lbl:'健康',tcls:'sh',pill:'ph',fill:'#C8E6C9',stroke:'#388E3C',dentin:'#A5D6A7',snomed:'2667000',adv:''},
-  c:{lbl:'蛀牙',tcls:'sc',pill:'pc',fill:'#FFCDD2',stroke:'#C62828',dentin:'#EF9A9A',snomed:'80967001',adv:'建議盡快填補，避免蛀蝕加深影響牙髓。'},
-  r:{lbl:'已填補',tcls:'sr',pill:'pr',fill:'#BBDEFB',stroke:'#1565C0',dentin:'#90CAF9',snomed:'413502000',adv:'定期回診確認填補物狀態，避免繼發性蛀牙。'},
-  m:{lbl:'缺牙',tcls:'sm',pill:'pm',fill:'#ECEFF1',stroke:'#90A4AE',dentin:'#CFD8DC',snomed:'80515008',adv:'建議評估植牙或假牙，避免鄰牙傾斜。'},
-  p:{lbl:'牙周問題',tcls:'sp',pill:'pp',fill:'#FFF9C4',stroke:'#F9A825',dentin:'#FFF176',snomed:'37532009',adv:'建議牙周深部清潔，加強牙線使用。'},
-  o:{lbl:'其他',tcls:'so',pill:'po',fill:'#ECEFF1',stroke:'#78909C',dentin:'#CFD8DC',snomed:'110481000',adv:'請參閱醫師備註說明。'}
+  h:{lbl:'健康',pill:'ph',snomed:'2667000',adv:''},
+  c:{lbl:'蛀牙',pill:'pc',snomed:'80967001',adv:'建議盡快填補，避免蛀蝕加深影響牙髓。'},
+  r:{lbl:'已填補',pill:'pr',snomed:'413502000',adv:'定期回診確認填補物狀態，避免繼發性蛀牙。'},
+  m:{lbl:'缺牙',pill:'pm',snomed:'80515008',adv:'建議評估植牙或假牙，避免鄰牙傾斜。'},
+  p:{lbl:'牙周問題',pill:'pp',snomed:'37532009',adv:'建議牙周深部清潔，加強牙線使用。'},
+  o:{lbl:'其他',pill:'po',snomed:'110481000',adv:'請參閱醫師備註說明。'}
 };
 
-const DB={};const TMP={};let curFdi=null,curSt='h',curXray=null;
+// Status colours for SVG rendering
+const ST_COLORS={
+  h:{crown:'#C8E6C9',crownStroke:'#4CAF50',crownHL:'#E8F5E9',root:'#A5D6A7',rootTip:'#81C784',dentin:'rgba(255,255,255,0.5)'},
+  c:{crown:'#FFCDD2',crownStroke:'#E53935',crownHL:'#FFEBEE',root:'#EF9A9A',rootTip:'#E57373',dentin:'rgba(183,28,28,0.15)'},
+  r:{crown:'#BBDEFB',crownStroke:'#1E88E5',crownHL:'#E3F2FD',root:'#90CAF9',rootTip:'#64B5F6',dentin:'rgba(13,71,161,0.12)'},
+  m:{crown:'#ECEFF1',crownStroke:'#90A4AE',crownHL:'#F5F5F5',root:'#CFD8DC',rootTip:'#B0BEC5',dentin:'rgba(0,0,0,0)'},
+  p:{crown:'#FFF9C4',crownStroke:'#F9A825',crownHL:'#FFFDE7',root:'#FFE082',rootTip:'#FFD54F',dentin:'rgba(245,127,23,0.1)'},
+  o:{crown:'#ECEFF1',crownStroke:'#78909C',crownHL:'#F5F5F5',root:'#B0BEC5',rootTip:'#90A4AE',dentin:'rgba(0,0,0,0)'}
+};
 
-// ── INIT ──
-document.getElementById('visit-date').value=new Date().toISOString().slice(0,10);
-updateOrgId();
-makeTGrid('inp-upper',FDI_U,selInpTooth);
-makeTGrid('inp-lower',FDI_L,selInpTooth);
-renderCode();
+// ══════════════════════════
+//  STATE & PERSISTENCE
+// ══════════════════════════
+let DB={};
+let TMP={};
+let curFdi=null,curSt='h',curXray=null;
+let curMode='adult';
+let ptViewMode='adult';
+let curDoc=null;
+let pidCounter=1;
 
-// ── NAVIGATION ──
+function loadDB(){try{const d=localStorage.getItem('tw_dental_db');if(d)DB=JSON.parse(d);const c=localStorage.getItem('tw_dental_ctr');if(c)pidCounter=parseInt(c)||1}catch(e){DB={}}}
+function saveDB(){try{localStorage.setItem('tw_dental_db',JSON.stringify(DB));localStorage.setItem('tw_dental_ctr',String(pidCounter))}catch(e){}}
+function clearDB(){if(confirm('確定要清除所有儲存的病人資料？')){localStorage.removeItem('tw_dental_db');localStorage.removeItem('tw_dental_ctr');DB={};pidCounter=1;refreshDocSel();renderDbList();alert('已清除')}}
+
+loadDB();
+
+// ══════════════════════════
+//  DOCTOR LOGIN / LOGOUT
+// ══════════════════════════
+function switchLoginTab(tab,btn){
+  document.querySelectorAll('.login-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('lt-doc').style.display=tab==='doc'?'block':'none';
+  document.getElementById('lt-pt').style.display=tab==='pt'?'block':'none';
+}
+function docLogin(){
+  const lic=document.getElementById('li-lic').value.trim();
+  const name=document.getElementById('li-name').value.trim();
+  const clinic=document.getElementById('li-clinic').value.trim()||'診所';
+  if(!lic||!name){showToast('li-err','tor');return}
+  curDoc={lic,name,clinic};
+  document.getElementById('org-name').value=clinic;
+  updateOrgId();
+  document.getElementById('visit-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('topbar-right').style.display='flex';
+  document.getElementById('doc-chip').textContent='👨‍⚕️ '+name+' 醫師';
+  document.getElementById('nav-wrap').style.display='flex';
+  goPage('inp');
+}
+function docLogout(){
+  curDoc=null;
+  document.getElementById('topbar-right').style.display='none';
+  document.getElementById('nav-wrap').style.display='none';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-login').classList.add('active');
+}
+
+// ══════════════════════════
+//  NAVIGATION
+// ══════════════════════════
 function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-'+id).classList.add('active');
-  document.querySelectorAll('.tnb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ntb').forEach(b=>b.classList.remove('on'));
   const map={inp:0,view:1,plogin:2,sec:3,code:4};
-  const btns=document.querySelectorAll('.tnb');
+  const btns=document.querySelectorAll('.ntb');
   if(map[id]!==undefined)btns[map[id]].classList.add('on');
   if(id==='view')refreshDocSel();
   if(id==='code')renderCode();
+  if(id==='inp')renderDbList();
 }
 
-// ── ORG / PID ──
+// ══════════════════════════
+//  IC CARD SIMULATION
+// ══════════════════════════
+const IC_DEMO=[
+  {name:'王小明',pid:'A123456789',dob:'1985-03-15',ins:'active'},
+  {name:'李美華',pid:'B234567890',dob:'1990-07-22',ins:'active'},
+  {name:'陳大偉',pid:'C345678901',dob:'1972-11-05',ins:'active'},
+];
+let icIdx=0;
+function simulateIC(){
+  const zone=document.getElementById('ic-zone');
+  zone.classList.add('reading');
+  zone.innerHTML='<div style="font-size:13px;color:var(--blue-dk);font-weight:500">🪪 讀取中…</div>';
+  setTimeout(()=>{
+    const d=IC_DEMO[icIdx%IC_DEMO.length];icIdx++;
+    document.getElementById('pt-name').value=d.name;
+    document.getElementById('pt-idnum').value=d.pid;
+    document.getElementById('pt-dob').value=d.dob;
+    document.getElementById('pt-ins').value=d.ins;
+    updatePid();
+    zone.classList.remove('reading');zone.classList.add('done');
+    zone.innerHTML='<div style="font-size:13px;color:var(--green-dk);font-weight:500">✓ 已讀取：'+d.name+'</div><div style="font-size:11px;color:var(--green-dk);margin-top:2px">'+d.pid+'</div>';
+    showToast('ic-toast','tok');
+  },1200);
+}
+
+// ══════════════════════════
+//  ORG / PID
+// ══════════════════════════
 function genOrgId(n){const h=n.split('').reduce((a,c)=>a+c.charCodeAt(0),0);return'ORG-'+String(h).padStart(6,'0')}
 function updateOrgId(){
   const name=document.getElementById('org-name').value||'診所';
   const id=genOrgId(name);
   document.getElementById('org-id').textContent=id;
-  document.getElementById('nb-org-id-show').textContent=id;
-  document.getElementById('nb-org-name-show').textContent=name;
+  document.getElementById('nb-org-id').textContent=id;
+  document.getElementById('nb-org-name').textContent=name;
   updateNotepad();
 }
 function updatePid(){
   const v=document.getElementById('pt-idnum').value.trim();
   const d=new Date();
-  const y=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-  const pid=v.length>=2?'PID'+y+String(Object.keys(DB).length+1).padStart(3,'0'):'PID—';
+  const ds=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  const pid=v.length>=2?'PID'+ds+String(pidCounter).padStart(3,'0'):'PID—';
   document.getElementById('auto-pid').textContent=pid;
-  document.getElementById('nb-pat-id-show').textContent=pid;
-  document.getElementById('nb-pat-name-show').textContent=document.getElementById('pt-name').value||'尚未輸入';
+  document.getElementById('nb-pat-id').textContent=pid;
+  document.getElementById('nb-pat-name').textContent=document.getElementById('pt-name').value||'尚未輸入';
   updateNotepad();
 }
 
-// ── TOOTH GRID (small squares) ──
-function makeTGrid(id,fdis,cb){
-  const el=document.getElementById(id);el.innerHTML='';
-  fdis.forEach(f=>{
-    const d=document.createElement('div');
-    d.className='tc';d.id='tc-'+id+'-'+f;d.textContent=f;
-    d.onclick=()=>cb(f);
-    el.appendChild(d);
-  });
+// ══════════════════════════
+//  MODE (adult / baby / mixed)
+// ══════════════════════════
+function setMode(m){
+  curMode=m;
+  ['adult','baby','mixed'].forEach(k=>{const b=document.getElementById('mode-'+k);if(b)b.classList.toggle('on',k===m)});
+  buildArchInp();
 }
-function applyObs(prefix,fdis,obs){
-  fdis.forEach(f=>{
-    const el=document.getElementById('tc-'+prefix+'-'+f);
-    if(!el)return;
-    const st=(obs[f]&&obs[f].status)||'h';
-    el.className='tc '+S[st].tcls;
-  });
+function setPtMode(m){
+  ptViewMode=m;
+  ['adult','baby'].forEach(k=>{const b=document.getElementById('pt-mode-'+k);if(b)b.classList.toggle('on',k===m)});
+  if(window._ptViewObs)buildDentalChart('pt-arch-wrap',window._ptViewObs,ptViewMode,showPtDetail);
+}
+function modeRows(mode){
+  if(mode==='adult')return{upper:FDI_U,lower:FDI_L};
+  if(mode==='baby')return{upper:BABY_U,lower:BABY_L};
+  const upper=[FDI_U[0],FDI_U[1],FDI_U[2],FDI_U[3],BABY_U[0],BABY_U[1],BABY_U[2],BABY_U[3],BABY_U[4],BABY_U[5],BABY_U[6],BABY_U[7],FDI_U[12],FDI_U[13],FDI_U[14],FDI_U[15]];
+  const lower=[FDI_L[0],FDI_L[1],FDI_L[2],FDI_L[3],BABY_L[0],BABY_L[1],BABY_L[2],BABY_L[3],BABY_L[4],BABY_L[5],BABY_L[6],BABY_L[7],FDI_L[12],FDI_L[13],FDI_L[14],FDI_L[15]];
+  return{upper,lower};
 }
 
-// ── INPUT: select tooth ──
-function selInpTooth(fdi){
-  // deselect old
-  document.querySelectorAll('#inp-upper .tc, #inp-lower .tc').forEach(el=>el.classList.remove('sel'));
-  const el=document.getElementById('tc-inp-upper-'+fdi)||document.getElementById('tc-inp-lower-'+fdi);
-  if(el)el.classList.add('sel');
+// ══════════════════════════════════════════════════════════
+//  PROFESSIONAL SVG DENTAL CHART
+//  Each tooth is a proper anatomical SVG with:
+//  - Shaped crown (wide for molars, tapered for incisors, pointed for canines)
+//  - Realistic root morphology (bifurcated/trifurcated roots for molars)
+//  - Enamel highlight reflection
+//  - Dentin layer overlay
+//  - Status-based colour fills with gradients
+//  - Arch curvature via translateY
+// ══════════════════════════════════════════════════════════
+
+const ns='http://www.w3.org/2000/svg';
+
+// tooth type from FDI
+function toothType(fdi){
+  const n=parseInt(fdi)%10;
+  // baby teeth (5x, 6x, 7x, 8x)
+  if(fdi.startsWith('5')||fdi.startsWith('6')||fdi.startsWith('7')||fdi.startsWith('8')){
+    if(n<=2)return'i';if(n===3)return'c';return'm';
+  }
+  if(n<=2)return'i';if(n===3)return'c';if(n<=5)return'p';return'm';
+}
+
+// Decide if baby tooth
+function isBaby(fdi){return fdi.startsWith('5')||fdi.startsWith('6')||fdi.startsWith('7')||fdi.startsWith('8')}
+
+// arch curvature offset
+function archY(i,total,isLower){
+  const mid=(total-1)/2;
+  const dist=Math.abs(i-mid)/mid;
+  const lift=16*(1-dist*dist);
+  return isLower?lift*0.65:lift;
+}
+
+// SVG gradient defs — call once per svg
+function addDefs(svg,status){
+  const defs=document.createElementNS(ns,'defs');
+  const c=ST_COLORS[status];
+  // crown gradient (top highlight)
+  const cg=document.createElementNS(ns,'linearGradient');
+  cg.setAttribute('id','cg-'+status);cg.setAttribute('x1','0');cg.setAttribute('y1','0');cg.setAttribute('x2','0');cg.setAttribute('y2','1');
+  const cs0=document.createElementNS(ns,'stop');cs0.setAttribute('offset','0%');cs0.setAttribute('stop-color',c.crownHL);
+  const cs1=document.createElementNS(ns,'stop');cs1.setAttribute('offset','100%');cs1.setAttribute('stop-color',c.crown);
+  cg.appendChild(cs0);cg.appendChild(cs1);defs.appendChild(cg);
+  // root gradient
+  const rg=document.createElementNS(ns,'linearGradient');
+  rg.setAttribute('id','rg-'+status);rg.setAttribute('x1','0');rg.setAttribute('y1','0');rg.setAttribute('x2','0');rg.setAttribute('y2','1');
+  const rs0=document.createElementNS(ns,'stop');rs0.setAttribute('offset','0%');rs0.setAttribute('stop-color',c.root);
+  const rs1=document.createElementNS(ns,'stop');rs1.setAttribute('offset','100%');rs1.setAttribute('stop-color',c.rootTip);
+  rg.appendChild(rs0);rg.appendChild(rs1);defs.appendChild(rg);
+  svg.appendChild(defs);
+}
+
+/* drawTooth — returns an SVG <g> element
+   cx,cy = center-x, top-y of crown
+   type = i|c|p|m
+   isLower = direction of roots
+   status = h|c|r|m|p|o
+   baby = scale down slightly
+*/
+function drawToothSVG(cx, cy, type, isLower, status, baby){
+  const sc=baby?0.80:1.0;
+  const c=ST_COLORS[status];
+
+  // Tooth dimensions by type
+  const dims={
+    i:{cw:10,ch:16,rw:5.5,rh:18,rn:1,cr:3},
+    c:{cw:10,ch:20,rw:5,rh:22,rn:1,cr:2.5},
+    p:{cw:13,ch:17,rw:6,rh:19,rn:2,cr:3.5},
+    m:{cw:18,ch:16,rw:7,rh:18,rn:3,cr:4}
+  };
+  const d=dims[type]||dims.m;
+  const cw=d.cw*sc, ch=d.ch*sc, rw=d.rw*sc, rh=d.rh*sc;
+  const cr=d.cr*sc; // corner radius
+  const numRoots=d.rn;
+
+  const g=document.createElementNS(ns,'g');
+
+  const crownY=isLower?cy:cy-ch;
+  const rootY=isLower?cy+ch:cy-ch; // root tip direction
+
+  // ── CROWN ──
+  const crown=document.createElementNS(ns,'rect');
+  crown.setAttribute('x',cx-cw/2);
+  crown.setAttribute('y',crownY);
+  crown.setAttribute('width',cw);
+  crown.setAttribute('height',ch);
+  crown.setAttribute('rx',cr);
+  crown.setAttribute('ry',cr);
+  crown.setAttribute('fill','url(#cg-'+status+')');
+  crown.setAttribute('stroke',c.crownStroke);
+  crown.setAttribute('stroke-width','0.8');
+
+  // ── MISSING: hatching pattern ──
+  if(status==='m'){
+    crown.setAttribute('fill','#ECEFF1');
+    crown.setAttribute('stroke-dasharray','2,2');
+    // X cross
+    const x1=document.createElementNS(ns,'line');
+    x1.setAttribute('x1',cx-cw/2+2);x1.setAttribute('y1',crownY+2);
+    x1.setAttribute('x2',cx+cw/2-2);x1.setAttribute('y2',crownY+ch-2);
+    x1.setAttribute('stroke','#90A4AE');x1.setAttribute('stroke-width','1');
+    const x2=document.createElementNS(ns,'line');
+    x2.setAttribute('x1',cx+cw/2-2);x2.setAttribute('y1',crownY+2);
+    x2.setAttribute('x2',cx-cw/2+2);x2.setAttribute('y2',crownY+ch-2);
+    x2.setAttribute('stroke','#90A4AE');x2.setAttribute('stroke-width','1');
+    g.appendChild(crown);g.appendChild(x1);g.appendChild(x2);
+  } else {
+    g.appendChild(crown);
+
+    // ── ENAMEL HIGHLIGHT ──
+    const hl=document.createElementNS(ns,'rect');
+    hl.setAttribute('x',cx-cw/2+2);
+    hl.setAttribute('y',crownY+1.5);
+    hl.setAttribute('width',cw*0.4);
+    hl.setAttribute('height',ch*0.45);
+    hl.setAttribute('rx',cr*0.7);
+    hl.setAttribute('fill','rgba(255,255,255,0.55)');
+    g.appendChild(hl);
+
+    // ── DENTIN OVERLAY (filled status mark) ──
+    if(status==='r'){
+      const fill=document.createElementNS(ns,'rect');
+      fill.setAttribute('x',cx-cw/2+3);fill.setAttribute('y',crownY+3);
+      fill.setAttribute('width',cw-6);fill.setAttribute('height',ch-6);
+      fill.setAttribute('rx',cr*0.5);
+      fill.setAttribute('fill','rgba(25,118,210,0.25)');
+      g.appendChild(fill);
+    }
+    if(status==='c'){
+      const spot=document.createElementNS(ns,'ellipse');
+      spot.setAttribute('cx',cx+cw*0.1);spot.setAttribute('cy',crownY+ch*0.55);
+      spot.setAttribute('rx',cw*0.22);spot.setAttribute('ry',ch*0.18);
+      spot.setAttribute('fill','rgba(183,28,28,0.35)');
+      g.appendChild(spot);
+    }
+    if(status==='p'){
+      // periodontal lines at gum
+      for(let i=0;i<3;i++){
+        const pl=document.createElementNS(ns,'line');
+        pl.setAttribute('x1',cx-cw/2+(i+1)*cw/4);
+        pl.setAttribute('y1',isLower?crownY:crownY+ch-2);
+        pl.setAttribute('x2',cx-cw/2+(i+1)*cw/4);
+        pl.setAttribute('y2',isLower?crownY+3:crownY+ch);
+        pl.setAttribute('stroke','#F9A825');pl.setAttribute('stroke-width','1.2');
+        g.appendChild(pl);
+      }
+    }
+  }
+
+  // ── ROOTS ──
+  if(numRoots===1){
+    const root=document.createElementNS(ns,'path');
+    const ry=isLower?crownY+ch:crownY;
+    const tipY=isLower?ry+rh:ry-rh;
+    root.setAttribute('d',`M${cx-rw/2} ${ry} Q${cx-rw/3} ${(ry+tipY)/2} ${cx} ${tipY} Q${cx+rw/3} ${(ry+tipY)/2} ${cx+rw/2} ${ry}`);
+    root.setAttribute('fill',`url(#rg-${status})`);
+    root.setAttribute('stroke',c.crownStroke);root.setAttribute('stroke-width','0.6');
+    g.insertBefore(root,crown);
+  } else if(numRoots===2){
+    const ry=isLower?crownY+ch:crownY;
+    const tipY=isLower?ry+rh:ry-rh;
+    const off=cw*0.28;
+    [-off,off].forEach(dx=>{
+      const root=document.createElementNS(ns,'path');
+      const tx=cx+dx*(isLower?1:1);
+      root.setAttribute('d',`M${cx+dx*0.3-rw*0.38} ${ry} Q${tx-rw*0.2} ${(ry*0.6+tipY*0.4)} ${tx} ${tipY} Q${tx+rw*0.2} ${(ry*0.6+tipY*0.4)} ${cx+dx*0.3+rw*0.38} ${ry}`);
+      root.setAttribute('fill',`url(#rg-${status})`);
+      root.setAttribute('stroke',c.crownStroke);root.setAttribute('stroke-width','0.6');
+      g.insertBefore(root,crown);
+    });
+  } else {
+    // 3 roots for upper molars
+    const ry=isLower?crownY+ch:crownY;
+    const tipY=isLower?ry+rh:ry-rh;
+    const tipYshort=isLower?ry+rh*0.82:ry-rh*0.82;
+    [[-cw*0.3,tipY],[0,tipYshort],[cw*0.3,tipY]].forEach(([dx,ty])=>{
+      const root=document.createElementNS(ns,'path');
+      root.setAttribute('d',`M${cx+dx*0.25-rw*0.32} ${ry} Q${cx+dx*0.7-rw*0.15} ${(ry*0.55+ty*0.45)} ${cx+dx} ${ty} Q${cx+dx*0.7+rw*0.15} ${(ry*0.55+ty*0.45)} ${cx+dx*0.25+rw*0.32} ${ry}`);
+      root.setAttribute('fill',`url(#rg-${status})`);
+      root.setAttribute('stroke',c.crownStroke);root.setAttribute('stroke-width','0.55');
+      g.insertBefore(root,crown);
+    });
+  }
+
+  // ── FDI LABEL ──
+  const lbl=document.createElementNS(ns,'text');
+  const lblY=isLower?crownY+ch+rh+9:crownY-rh-4;
+  lbl.setAttribute('x',cx);lbl.setAttribute('y',lblY);
+  lbl.setAttribute('text-anchor','middle');
+  lbl.setAttribute('font-size','6.5');
+  lbl.setAttribute('fill','#80868B');
+  lbl.setAttribute('font-weight','500');
+  lbl.setAttribute('font-family','JetBrains Mono,monospace');
+  // store fdi in attribute set by caller
+  g.appendChild(lbl);
+
+  return g;
+}
+
+// ══════════════════════════
+//  BUILD DENTAL CHART
+// ══════════════════════════
+function buildDentalChart(containerId, obs, mode, clickCb){
+  const el=document.getElementById(containerId);
+  const {upper,lower}=modeRows(mode);
+  const isBabyMode=(mode==='baby');
+
+  // Sizing
+  const toothW=22, gap=2;
+  const numTeeth=Math.max(upper.length,lower.length);
+  const totalW=numTeeth*(toothW+gap)+20;
+  const crownH=20*1.1, rootH=18*1.1;
+  const midGap=22; // space between arches at midline
+  const svgH=crownH*2+rootH*2+midGap+40;
+
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox',`0 0 ${totalW} ${svgH}`);
+  svg.setAttribute('width','100%');
+  svg.style.overflow='visible';
+  svg.style.display='block';
+
+  // Add gradient defs for all statuses
+  const allStatuses=['h','c','r','m','p','o'];
+  const defsEl=document.createElementNS(ns,'defs');
+  allStatuses.forEach(status=>{
+    const c=ST_COLORS[status];
+    // crown gradient
+    const cgId='cg-'+status;
+    const cg=document.createElementNS(ns,'linearGradient');
+    cg.setAttribute('id',cgId);cg.setAttribute('x1','0');cg.setAttribute('y1','0');cg.setAttribute('x2','0');cg.setAttribute('y2','1');
+    const s0=document.createElementNS(ns,'stop');s0.setAttribute('offset','0%');s0.setAttribute('stop-color',c.crownHL);
+    const s1=document.createElementNS(ns,'stop');s1.setAttribute('offset','100%');s1.setAttribute('stop-color',c.crown);
+    cg.appendChild(s0);cg.appendChild(s1);defsEl.appendChild(cg);
+    // root gradient
+    const rgId='rg-'+status;
+    const rg=document.createElementNS(ns,'linearGradient');
+    rg.setAttribute('id',rgId);rg.setAttribute('x1','0');rg.setAttribute('y1','0');rg.setAttribute('x2','0');rg.setAttribute('y2','1');
+    const r0=document.createElementNS(ns,'stop');r0.setAttribute('offset','0%');r0.setAttribute('stop-color',c.root);
+    const r1=document.createElementNS(ns,'stop');r1.setAttribute('offset','100%');r1.setAttribute('stop-color',c.rootTip);
+    rg.appendChild(r0);rg.appendChild(r1);defsEl.appendChild(rg);
+  });
+  svg.appendChild(defsEl);
+
+  // Background subtle gum lines
+  const upperGumY=rootH+14+20;
+  const lowerGumY=upperGumY+crownH+midGap;
+  [upperGumY,lowerGumY].forEach((gy,idx)=>{
+    const gum=document.createElementNS(ns,'rect');
+    gum.setAttribute('x','5');gum.setAttribute('y',idx===0?gy-2:gy-crownH+2);
+    gum.setAttribute('width',totalW-10);gum.setAttribute('height','4');
+    gum.setAttribute('rx','2');gum.setAttribute('fill','rgba(239,154,154,0.25)');
+    svg.appendChild(gum);
+  });
+
+  const startX=10+(toothW+gap)/2;
+
+  // --- Draw selected tooth highlight track ---
+  const selHighlight=document.createElementNS(ns,'rect');
+  selHighlight.setAttribute('rx','4');selHighlight.setAttribute('fill','none');
+  selHighlight.setAttribute('stroke','#1A73E8');selHighlight.setAttribute('stroke-width','1.5');
+  selHighlight.setAttribute('stroke-dasharray','3,2');selHighlight.style.display='none';
+  svg.appendChild(selHighlight);
+
+  let selectedG=null;
+  const groups={};
+
+  function drawRow(fdis, isLower, rowY){
+    fdis.forEach((fdi,i)=>{
+      const cx=startX+i*(toothW+gap);
+      const cy=rowY;
+      const st=(obs[fdi]&&obs[fdi].status)||'h';
+      const type=toothType(fdi);
+      const baby=isBaby(fdi);
+
+      const g=drawToothSVG(cx,cy,type,isLower,st,baby||isBabyMode);
+
+      // Set FDI label text on the text element (last child)
+      const lblEl=g.querySelector('text');
+      if(lblEl)lblEl.textContent=fdi;
+
+      // Store for click
+      g.style.cursor='pointer';
+      g.style.transition='transform 0.12s';
+      g.dataset.fdi=fdi;
+      groups[fdi]=g;
+
+      g.addEventListener('mouseenter',()=>{if(g!==selectedG)g.style.filter='drop-shadow(0 1px 4px rgba(0,0,0,0.22))'});
+      g.addEventListener('mouseleave',()=>{if(g!==selectedG)g.style.filter='none'});
+      g.addEventListener('click',()=>{
+        if(selectedG){selectedG.style.filter='none';}
+        selectedG=g;
+        g.style.filter='drop-shadow(0 0 5px rgba(26,115,232,0.7))';
+        // move translate Y slightly for click feedback
+        const origTransform=g.getAttribute('data-orig-transform')||'';
+        clickCb(fdi,obs);
+      });
+
+      // arch curvature: translate Y
+      const lift=archY(i,fdis.length,isLower);
+      g.setAttribute('transform',`translate(0,${isLower?lift:-lift})`);
+      g.setAttribute('data-orig-transform',`translate(0,${isLower?lift:-lift})`);
+
+      svg.appendChild(g);
+    });
+  }
+
+  // Row positions
+  const upperCrownY=upperGumY; // crown top y for upper (roots go up)
+  const lowerCrownY=lowerGumY-crownH; // crown top y for lower (roots go down)
+
+  drawRow(upper,false,upperCrownY);
+
+  // Midline label
+  const midY=(upperGumY+lowerGumY)/2;
+  const midLine=document.createElementNS(ns,'line');
+  midLine.setAttribute('x1','8');midLine.setAttribute('y1',midY);
+  midLine.setAttribute('x2',totalW-8);midLine.setAttribute('y2',midY);
+  midLine.setAttribute('stroke','#DADCE0');midLine.setAttribute('stroke-width','0.8');
+  midLine.setAttribute('stroke-dasharray','5,4');
+  svg.appendChild(midLine);
+  const midLbl=document.createElementNS(ns,'text');
+  midLbl.setAttribute('x',totalW/2);midLbl.setAttribute('y',midY+4);
+  midLbl.setAttribute('text-anchor','middle');midLbl.setAttribute('font-size','7');
+  midLbl.setAttribute('fill','#9AA0A6');midLbl.setAttribute('font-family','DM Sans,sans-serif');
+  midLbl.textContent='上顎  ·  下顎';
+  svg.appendChild(midLbl);
+
+  drawRow(lower,true,lowerCrownY);
+
+  // Legend
+  const legendData=[
+    {st:'h',label:'健康'},{st:'c',label:'蛀牙'},{st:'r',label:'已填補'},
+    {st:'m',label:'缺牙'},{st:'p',label:'牙周問題'},{st:'o',label:'其他'}
+  ];
+  const wrap=document.createElement('div');
+  wrap.className='dental-chart-wrap';
+  wrap.appendChild(svg);
+  const legRow=document.createElement('div');legRow.className='chart-legends';
+  legendData.forEach(ld=>{
+    const lc=ST_COLORS[ld.st];
+    legRow.innerHTML+=`<div class="leg"><div class="leg-swatch" style="background:${lc.crown};border:1px solid ${lc.crownStroke}"></div>${ld.label}</div>`;
+  });
+  wrap.appendChild(legRow);
+  el.innerHTML='';
+  el.appendChild(wrap);
+}
+
+function buildArchInp(){
+  buildDentalChart('inp-arch-wrap',TMP,curMode,selInpTooth);
+}
+
+// ══════════════════════════
+//  INPUT TOOTH SELECT
+// ══════════════════════════
+function selInpTooth(fdi,_obs){
   curFdi=fdi;curXray=null;
-
   document.getElementById('inp-hint').style.display='none';
   document.getElementById('inp-form').style.display='block';
-  document.getElementById('inp-lbl').textContent=NAMES[fdi];
-  document.getElementById('inp-fdi-label').textContent='FDI '+fdi+' · SNOMED '+S[curSt].snomed;
-
-  // restore previous inputs for this tooth
+  document.getElementById('inp-lbl').textContent=NAMES[fdi]||fdi;
+  document.getElementById('inp-fdi-sub').textContent='FDI '+fdi+' · SNOMED '+S[curSt].snomed;
   const prev=TMP[fdi];
   if(prev){
     setS(prev.status,true);
-    if(prev.surfs)prev.surfs.split('').forEach(sv=>{
-      document.querySelectorAll('.sf-btn').forEach(b=>{if(b.dataset.v===sv)b.classList.add('on');else b.classList.remove('on')});
-    });
+    document.querySelectorAll('.sf-btn').forEach(b=>b.classList.toggle('on',prev.surfs&&prev.surfs.includes(b.dataset.v)));
     document.getElementById('inp-note').value=prev.note||'';
     if(prev.material)document.getElementById('inp-mat').value=prev.material;
     if(prev.depth)document.getElementById('inp-dep').value=prev.depth;
-    if(prev.xray){curXray=prev.xray;showXrayInfo(prev.xray.name)}
-  } else {
-    clearForm();
-  }
-
-  // history
+    if(prev.xray){curXray=prev.xray;document.getElementById('xray-img').src=prev.xray.dataUrl;document.getElementById('xray-img').style.display='block';document.getElementById('xray-ph').style.display='none';document.getElementById('xray-info').style.display='block';document.getElementById('xray-info').textContent='✓ '+prev.xray.name;}
+    else resetXray();
+  } else clearForm();
   renderHistory(fdi);
 }
 
@@ -758,106 +1162,72 @@ function clearForm(){
   document.querySelectorAll('.sf-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('inp-note').value='';
   document.getElementById('inp-dep').value='3.5';
-  const xi=document.getElementById('xray-img');xi.style.display='none';
-  document.getElementById('xray-info').style.display='none';
-  document.getElementById('xray-ph').style.display='block';
   document.getElementById('f-surf').style.display='none';
   document.getElementById('f-mat').style.display='none';
   document.getElementById('f-dep').style.display='none';
-  curSt='h';curXray=null;
+  resetXray();curSt='h';curXray=null;
+}
+function resetXray(){
+  document.getElementById('xray-img').style.display='none';document.getElementById('xray-img').src='';
+  document.getElementById('xray-ph').style.display='block';document.getElementById('xray-info').style.display='none';
 }
 
 function renderHistory(fdi){
   const hist=document.getElementById('inp-hist');
-  // collect history from DB for this fdi
-  const entries=[];
-  Object.values(DB).forEach(pt=>{
-    if(pt.obs[fdi]&&pt.obs[fdi].date){
-      entries.push({date:pt.obs[fdi].date,status:pt.obs[fdi].status,clinic:pt.lastClinic||'—',note:pt.obs[fdi].note||''});
-    }
-  });
-  if(!entries.length){hist.innerHTML='<div class="hist-empty">此牙位尚無歷史紀錄</div>';return}
+  const entries=Object.values(DB).flatMap(pt=>pt.obs[fdi]&&pt.obs[fdi].date?[{date:pt.obs[fdi].date,status:pt.obs[fdi].status,clinic:pt.lastClinic||'—',note:pt.obs[fdi].note||''}]:[]);
   entries.sort((a,b)=>b.date.localeCompare(a.date));
-  hist.innerHTML=entries.map(e=>`
-    <div class="hist-entry">
-      <div>
-        <span class="pill ${S[e.status].pill}" style="margin-right:6px">${S[e.status].lbl}</span>
-        <span style="font-size:11px;color:var(--gray600)">${e.clinic}</span>
-        ${e.note?`<div style="font-size:11px;color:var(--gray600);margin-top:2px">${e.note}</div>`:''}
-      </div>
-      <span style="font-size:11px;color:var(--gray500);flex-shrink:0">${e.date}</span>
-    </div>`).join('');
+  hist.innerHTML=entries.length?entries.map(e=>`<div class="hist-entry"><div><span class="pill ${S[e.status].pill}" style="margin-right:5px">${S[e.status].lbl}</span><span style="font-size:11px;color:var(--g600)">${e.clinic}</span>${e.note?`<div style="font-size:11px;color:var(--g600);margin-top:1px">${e.note}</div>`:''}</div><span style="font-size:11px;color:var(--g500);flex-shrink:0">${e.date}</span></div>`).join(''):'<div class="hist-empty">此牙位尚無歷史紀錄</div>';
 }
 
-// ── STATUS SELECT ──
+// ══════════════════════════
+//  STATUS
+// ══════════════════════════
 function setS(v,silent){
   curSt=v;
-  document.querySelectorAll('.st-btn').forEach(b=>{
-    const map={h:'onh',c:'onc',r:'onr',m:'onm',p:'onp',o:'ono'};
-    b.className='st-btn'+(b.dataset.v===v?' '+map[v]:'');
-  });
-  document.getElementById('inp-fdi-label').textContent='FDI '+curFdi+' · SNOMED '+S[v].snomed;
+  const map={h:'onh',c:'onc',r:'onr',m:'onm',p:'onp',o:'ono'};
+  document.querySelectorAll('.st-btn').forEach(b=>{b.className='st-btn'+(b.dataset.v===v?' '+map[v]:'')});
+  if(curFdi)document.getElementById('inp-fdi-sub').textContent='FDI '+curFdi+' · SNOMED '+S[v].snomed;
   document.getElementById('f-surf').style.display=(v==='c'||v==='r')?'block':'none';
-  document.getElementById('f-mat').style.display=(v==='r')?'block':'none';
-  document.getElementById('f-dep').style.display=(v==='p')?'block':'none';
+  document.getElementById('f-mat').style.display=v==='r'?'block':'none';
+  document.getElementById('f-dep').style.display=v==='p'?'block':'none';
   document.getElementById('inp-spill').innerHTML=`<span class="pill ${S[v].pill}">${S[v].lbl}</span>`;
   if(!silent)updateNotepad();
 }
 
-// ── X-RAY ──
+// ══════════════════════════
+//  XRAY
+// ══════════════════════════
 function loadXray(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{
-    curXray={name:f.name,id:'xray-'+Date.now(),dataUrl:ev.target.result};
-    const img=document.getElementById('xray-img');img.src=ev.target.result;img.style.display='block';
+  r.onload=ev=>{curXray={name:f.name,id:'xray-'+Date.now(),dataUrl:ev.target.result};
+    document.getElementById('xray-img').src=ev.target.result;document.getElementById('xray-img').style.display='block';
     document.getElementById('xray-ph').style.display='none';
-    showXrayInfo(f.name);
+    document.getElementById('xray-info').style.display='block';document.getElementById('xray-info').textContent='✓ '+f.name;
   };r.readAsDataURL(f);
 }
-function showXrayInfo(name){
-  const i=document.getElementById('xray-info');i.style.display='block';i.textContent='✓ '+name;
-}
 
-// ── SAVE OBS ──
+// ══════════════════════════
+//  SAVE OBS
+// ══════════════════════════
 function saveObs(){
   if(!curFdi){alert('請先點選牙位');return}
   const surfs=[...document.querySelectorAll('.sf-btn.on')].map(b=>b.dataset.v).join('');
   const date=document.getElementById('visit-date').value||new Date().toISOString().slice(0,10);
-  TMP[curFdi]={
-    status:curSt,
-    surfs,
-    material:curSt==='r'?document.getElementById('inp-mat').value:'',
-    depth:curSt==='p'?document.getElementById('inp-dep').value:'',
-    note:document.getElementById('inp-note').value.trim(),
-    xray:curXray,
-    date,
-    id:'obs-'+Date.now()
-  };
-  // update grid color
-  const upper=document.getElementById('tc-inp-upper-'+curFdi);
-  const lower=document.getElementById('tc-inp-lower-'+curFdi);
-  if(upper)upper.className='tc '+S[curSt].tcls+' sel';
-  if(lower)lower.className='tc '+S[curSt].tcls+' sel';
-
-  updateSavedList();updateNotepad();
-  const t=document.getElementById('t-obs');t.style.display='block';setTimeout(()=>t.style.display='none',2000);
+  TMP[curFdi]={status:curSt,surfs,material:curSt==='r'?document.getElementById('inp-mat').value:'',depth:curSt==='p'?document.getElementById('inp-dep').value:'',note:document.getElementById('inp-note').value.trim(),xray:curXray,date,id:'obs-'+Date.now()};
+  buildArchInp();updateSavedList();updateNotepad();
+  showToast('t-obs','tok');
 }
 
 function updateSavedList(){
   const keys=Object.keys(TMP);
   document.getElementById('saved-card').style.display=keys.length?'block':'none';
-  document.getElementById('saved-list').innerHTML=keys.map(f=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray100);font-size:13px">
-      <span>${NAMES[f]} <span style="color:var(--gray500);font-size:10px">FDI${f}</span></span>
-      <div style="display:flex;gap:5px;align-items:center">
-        ${TMP[f].xray?'<span style="font-size:10px;background:var(--blue-light);color:var(--blue-dark);padding:1px 6px;border-radius:10px">X光</span>':''}
-        <span class="pill ${S[TMP[f].status].pill}">${S[TMP[f].status].lbl}</span>
-      </div>
-    </div>`).join('');
+  document.getElementById('saved-list').innerHTML=keys.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--g100);font-size:13px"><span>${NAMES[f]||f} <span style="color:var(--g500);font-size:10px;font-family:'JetBrains Mono',monospace">FDI${f}</span></span><div style="display:flex;gap:4px;align-items:center">${TMP[f].xray?'<span style="font-size:10px;background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:10px">X光</span>':''}<span class="pill ${S[TMP[f].status].pill}">${S[TMP[f].status].lbl}</span></div></div>`).join('');
 }
 
-// ── COMMIT ──
+// ══════════════════════════
+//  COMMIT
+// ══════════════════════════
 function commitPt(){
   const name=document.getElementById('pt-name').value.trim();
   const pid=document.getElementById('pt-idnum').value.trim().toUpperCase();
@@ -866,482 +1236,185 @@ function commitPt(){
   const oid=genOrgId(document.getElementById('org-name').value||'診所');
   const clinic=document.getElementById('org-name').value||'診所';
   const date=document.getElementById('visit-date').value||new Date().toISOString().slice(0,10);
-
-  if(!DB[pid])DB[pid]={name,pid,apid,oid,dob:document.getElementById('pt-dob').value,ins:document.getElementById('pt-ins').value,obs:{},visits:[]};
+  if(!DB[pid]){
+    DB[pid]={name,pid,apid,oid,dob:document.getElementById('pt-dob').value,ins:document.getElementById('pt-ins').value,obs:{},visits:[]};
+    pidCounter++;
+  }
   Object.assign(DB[pid].obs,JSON.parse(JSON.stringify(TMP)));
   DB[pid].lastDate=date;DB[pid].lastClinic=clinic;
-  DB[pid].visits.push({date,clinic,teeth:Object.keys(TMP).length});
-
+  DB[pid].visits=DB[pid].visits||[];
+  DB[pid].visits.push({date,clinic,doctor:curDoc?curDoc.name:'',teeth:Object.keys(TMP).length});
+  saveDB();
   Object.keys(TMP).forEach(k=>delete TMP[k]);
-  // reset form
   document.getElementById('pt-name').value='';document.getElementById('pt-idnum').value='';
   document.getElementById('auto-pid').textContent='PID—';
-  document.getElementById('nb-pat-id-show').textContent='PID—';
   document.getElementById('saved-card').style.display='none';
-  document.getElementById('inp-form').style.display='none';
-  document.getElementById('inp-hint').style.display='block';
-  makeTGrid('inp-upper',FDI_U,selInpTooth);makeTGrid('inp-lower',FDI_L,selInpTooth);
-  refreshDocSel();updateNotepad();buildBundle(DB[pid]);
-  const t=document.getElementById('t-commit');t.style.display='block';setTimeout(()=>t.style.display='none',2500);
+  document.getElementById('inp-form').style.display='none';document.getElementById('inp-hint').style.display='block';
+  buildArchInp();refreshDocSel();updateNotepad();buildBundle(DB[pid]);renderDbList();
+  const z=document.getElementById('ic-zone');z.classList.remove('done','reading');
+  z.innerHTML='<div style="font-size:13px;font-weight:500;color:var(--g600)">🪪 健保 IC 卡插卡區</div><div style="font-size:11px;color:var(--g500);margin-top:3px">實際環境連接讀卡機 API</div>';
+  showToast('t-commit','tob');
 }
 
-// ── NOTEPAD ──
+// ══════════════════════════
+//  NOTEPAD
+// ══════════════════════════
 function updateNotepad(){
   const orgName=document.getElementById('org-name').value||'診所';
   const oid=genOrgId(orgName);
   const pid=document.getElementById('auto-pid').textContent;
   const ptName=document.getElementById('pt-name').value||'';
-
-  document.getElementById('nb-org-json').innerHTML=hl(JSON.stringify({
-    resourceType:'Organization',id:oid,name:orgName
-  },null,2));
-
-  if(pid!=='PID—'&&ptName){
-    document.getElementById('nb-pat-json').innerHTML=hl(JSON.stringify({
-      resourceType:'Patient',id:pid,
-      name:[{text:ptName}],
-      managingOrganization:{reference:'Organization/'+oid}
-    },null,2));
-  } else {
-    document.getElementById('nb-pat-json').textContent='尚未建立';
-  }
-
+  setFhirCode('nb-org-j',{resourceType:'Organization',id:oid,name:orgName});
+  if(pid!=='PID—'&&ptName)setFhirCode('nb-pat-j',{resourceType:'Patient',id:pid,name:[{text:ptName}],managingOrganization:{reference:'Organization/'+oid}});
+  else document.getElementById('nb-pat-j').textContent='尚未建立';
   const obsKeys=Object.keys(TMP);
-  document.getElementById('nb-obs-count').textContent=obsKeys.length+' 筆';
-  document.getElementById('nb-obs-json').textContent=obsKeys.length
-    ? obsKeys.map(f=>`Obs(FDI ${f}): ${S[TMP[f].status].lbl}${TMP[f].xray?' [X光]':''}${TMP[f].surfs?' 牙面:'+TMP[f].surfs:''}`).join('\n')
-    :'尚無記錄';
+  document.getElementById('nb-obs-cnt').textContent=obsKeys.length+' 筆';
+  document.getElementById('nb-obs-j').textContent=obsKeys.length?obsKeys.map(f=>`Obs(FDI ${f}): ${S[TMP[f].status].lbl}${TMP[f].xray?' [X光]':''}${TMP[f].surfs?' 牙面:'+TMP[f].surfs:''}`).join('\n'):'尚無記錄';
 }
+function setFhirCode(id,obj){document.getElementById(id).innerHTML=hl(JSON.stringify(obj,null,2))}
 
-// ── BUNDLE ──
 function buildBundle(pt){
-  const obs=pt.obs;
-  const bundle={
-    resourceType:'Bundle',type:'transaction',
-    meta:{security:[{code:'N',display:'Normal'}]},
-    entry:[
-      {resource:{resourceType:'Organization',id:pt.oid,name:pt.lastClinic}},
-      {resource:{resourceType:'Patient',id:pt.apid,
-        meta:{security:[{code:'N'}]},
-        identifier:[{system:'https://twdental.org/id/patient',value:pt.pid}],
-        name:[{text:pt.name}],
-        birthDate:pt.dob,
-        managingOrganization:{reference:'Organization/'+pt.oid}
-      }},
-      ...Object.keys(obs).map(f=>({resource:{
-        resourceType:'Observation',id:obs[f].id,status:'final',
-        meta:{profile:['https://twdental.org/fhir/StructureDefinition/TWDentalObservation']},
-        subject:{reference:'Patient/'+pt.apid},
-        effectiveDateTime:obs[f].date+'T00:00:00+08:00',
-        valueCodeableConcept:{coding:[{system:'http://snomed.info/sct',code:S[obs[f].status].snomed,display:S[obs[f].status].lbl}]},
-        extension:[
-          {url:'https://twdental.org/fhir/StructureDefinition/tooth-fdi-number',valueCode:f},
-          ...(obs[f].surfs?[{url:'https://twdental.org/fhir/StructureDefinition/tooth-surface',valueCode:obs[f].surfs}]:[]),
-          ...(obs[f].depth?[{url:'https://twdental.org/fhir/StructureDefinition/periodontal-pocket-depth',valueQuantity:{value:parseFloat(obs[f].depth),unit:'mm'}}]:[])
-        ]
-      }}))
-    ]
-  };
-  document.getElementById('nb-bundle-json').innerHTML=hl(JSON.stringify(bundle,null,2));
+  const bundle={resourceType:'Bundle',type:'transaction',meta:{security:[{code:'N'}]},entry:[
+    {resource:{resourceType:'Organization',id:pt.oid,name:pt.lastClinic}},
+    {resource:{resourceType:'Patient',id:pt.apid,meta:{security:[{code:'N'}]},identifier:[{system:'https://twdental.org/id',value:pt.pid}],name:[{text:pt.name}],birthDate:pt.dob,managingOrganization:{reference:'Organization/'+pt.oid}}},
+    ...Object.keys(pt.obs).slice(0,3).map(f=>({resource:{resourceType:'Observation',id:pt.obs[f].id,status:'final',meta:{profile:['https://twdental.org/fhir/StructureDefinition/TWDentalObservation']},subject:{reference:'Patient/'+pt.apid},effectiveDateTime:(pt.obs[f].date||'2026-01-01')+'T00:00:00+08:00',valueCodeableConcept:{coding:[{system:'http://snomed.info/sct',code:S[pt.obs[f].status].snomed,display:S[pt.obs[f].status].lbl}]},extension:[{url:'https://twdental.org/fhir/StructureDefinition/tooth-fdi-number',valueCode:f},...(pt.obs[f].surfs?[{url:'https://twdental.org/fhir/StructureDefinition/tooth-surface',valueCode:pt.obs[f].surfs}]:[]),...(pt.obs[f].depth?[{url:'https://twdental.org/fhir/StructureDefinition/periodontal-pocket-depth',valueQuantity:{value:parseFloat(pt.obs[f].depth),unit:'mm'}}]:[])]}}))
+  ]};
+  document.getElementById('nb-bun-j').innerHTML=hl(JSON.stringify(bundle,null,2));
 }
 
-// ── SEARCH / LOAD ──
+// ══════════════════════════
+//  DB LIST
+// ══════════════════════════
+function renderDbList(){
+  const el=document.getElementById('db-list');
+  const pts=Object.values(DB);
+  el.innerHTML=pts.length?pts.map(p=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--g100)"><span>${p.name}</span><span class="pid-badge">${p.apid}</span></div>`).join(''):'<div style="color:var(--g500);padding:6px 0">尚無儲存資料</div>';
+}
+
+// ══════════════════════════
+//  SEARCH / LOAD PT
+// ══════════════════════════
 function refreshDocSel(){
   const s=document.getElementById('pt-sel');const cur=s.value;
-  s.innerHTML='<option value="">— 從清單選擇 —</option>';
+  s.innerHTML='<option value="">— 清單選擇 —</option>';
   Object.values(DB).forEach(p=>{const o=document.createElement('option');o.value=p.pid;o.textContent=p.name+' · '+p.apid;s.appendChild(o)});
   if(cur)s.value=cur;
 }
-
 function doSearch(){
   const q=document.getElementById('srch').value.trim().toUpperCase();
   const f=Object.values(DB).find(p=>p.pid===q||p.apid.toUpperCase()===q||p.name.includes(document.getElementById('srch').value.trim()));
-  if(f){document.getElementById('srch-err').style.display='none';loadPt(f.pid)}
+  if(f){document.getElementById('srch-err').style.display='none';loadPt(f.pid);}
   else document.getElementById('srch-err').style.display='block';
 }
-
 function loadPt(pid){
-  if(!pid||!DB[pid]){
-    document.getElementById('view-body').style.display='none';
-    document.getElementById('view-empty').style.display='block';return;
-  }
-  document.getElementById('view-empty').style.display='none';
-  document.getElementById('view-body').style.display='block';
+  if(!pid||!DB[pid]){document.getElementById('view-body').style.display='none';document.getElementById('view-empty').style.display='block';return}
+  document.getElementById('view-empty').style.display='none';document.getElementById('view-body').style.display='block';
   const pt=DB[pid];
   document.getElementById('v-av').textContent=pt.name[0];
   document.getElementById('v-name').textContent=pt.name;
   document.getElementById('v-pid').textContent=pt.apid;
   document.getElementById('v-org').textContent=pt.oid;
-  document.getElementById('v-date').textContent='最後就診 '+(pt.lastDate||'—');
-  document.getElementById('v-meta').textContent=(pt.dob?'生日 '+pt.dob+' · ':'')+pt.ins;
-
+  document.getElementById('v-meta').textContent=(pt.dob?'生日 '+pt.dob+' · ':'')+pt.ins+' · 最後就診 '+(pt.lastDate||'—');
   renderStats('v-stats',pt.obs);
-  makeTGrid('v-upper',FDI_U,f=>showDetail('v-detail',f,pt.obs));
-  makeTGrid('v-lower',FDI_L,f=>showDetail('v-detail',f,pt.obs));
-  applyObs('v-upper',FDI_U,pt.obs);
-  applyObs('v-lower',FDI_L,pt.obs);
+  buildDentalChart('v-arch-wrap',pt.obs,curMode,f=>showDetail('v-detail',f,pt.obs));
   renderObsList('v-list',pt.obs,pt);
-
-  // View notepad
-  document.getElementById('v-nb-org').innerHTML=hl(JSON.stringify({resourceType:'Organization',id:pt.oid,name:pt.lastClinic},null,2));
+  setFhirCode('v-nb-org',{resourceType:'Organization',id:pt.oid,name:pt.lastClinic});
   document.getElementById('v-nb-pid').textContent=pt.apid;
-  document.getElementById('v-nb-pat').innerHTML=hl(JSON.stringify({resourceType:'Patient',id:pt.apid,name:[{text:pt.name}]},null,2));
+  setFhirCode('v-nb-pat',{resourceType:'Patient',id:pt.apid,name:[{text:pt.name}]});
   buildBundle(pt);
-  document.getElementById('v-nb-bundle').innerHTML=document.getElementById('nb-bundle-json').innerHTML;
+  document.getElementById('v-nb-bun').innerHTML=document.getElementById('nb-bun-j').innerHTML;
 }
 
-// ── STATS ──
+// ══════════════════════════
+//  STATS
+// ══════════════════════════
 function renderStats(id,obs){
   const c={h:0,c:0,r:0,m:0,p:0,o:0};
-  [...FDI_U,...FDI_L].forEach(f=>{const s=(obs[f]&&obs[f].status)||'h';c[s]=(c[s]||0)+1});
-  document.getElementById(id).innerHTML=`
-    <div class="stat"><div class="stat-n" style="color:var(--green-dark)">${c.h}</div><div class="stat-l">健康</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--red-dark)">${c.c}</div><div class="stat-l">蛀牙</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--blue-dark)">${c.r}</div><div class="stat-l">已填補</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--gray700)">${c.m+c.p+c.o}</div><div class="stat-l">其他</div></div>`;
+  [...FDI_U,...FDI_L,...BABY_U,...BABY_L].forEach(f=>{const s=(obs[f]&&obs[f].status)||'h';c[s]=(c[s]||0)+1});
+  document.getElementById(id).innerHTML=`<div class="stat"><div class="stat-n" style="color:var(--green-dk)">${c.h}</div><div class="stat-l">健康</div></div><div class="stat"><div class="stat-n" style="color:var(--red-dk)">${c.c}</div><div class="stat-l">蛀牙</div></div><div class="stat"><div class="stat-n" style="color:var(--blue-dk)">${c.r}</div><div class="stat-l">已填補</div></div><div class="stat"><div class="stat-n" style="color:var(--g700)">${c.m+c.p+c.o}</div><div class="stat-l">其他</div></div>`;
 }
 
-// ── DETAIL ──
+// ══════════════════════════
+//  DETAIL
+// ══════════════════════════
 function showDetail(id,fdi,obs){
   const ob=obs[fdi];const st=ob?ob.status:'h';const sm=S[st];
-  let r=`<div class="det-row"><div class="dl">FDI 牙位</div><div class="dv">${fdi}</div></div>
-    <div class="det-row"><div class="dl">牙齒名稱</div><div class="dv">${NAMES[fdi]}</div></div>
-    <div class="det-row"><div class="dl">狀態</div><div class="dv"><span class="pill ${sm.pill}">${sm.lbl}</span></div></div>`;
+  let r=`<div class="det-row"><div class="dl">FDI</div><div class="dv" style="font-family:'JetBrains Mono',monospace">${fdi}</div></div><div class="det-row"><div class="dl">牙齒</div><div class="dv">${NAMES[fdi]||fdi}</div></div><div class="det-row"><div class="dl">狀態</div><div class="dv"><span class="pill ${sm.pill}">${sm.lbl}</span></div></div>`;
   if(ob&&ob.surfs)r+=`<div class="det-row"><div class="dl">牙面</div><div class="dv">${ob.surfs}</div></div>`;
   if(ob&&ob.material)r+=`<div class="det-row"><div class="dl">材料</div><div class="dv" style="font-size:12px">${ob.material}</div></div>`;
   if(ob&&ob.depth)r+=`<div class="det-row"><div class="dl">探針深度</div><div class="dv">${ob.depth} mm</div></div>`;
-  if(ob&&ob.xray)r+=`<div class="det-row"><div class="dl">X光圖</div><div class="dv" style="color:var(--blue-dark)">${ob.xray.name}</div></div>`;
+  if(ob&&ob.xray)r+=`<div class="det-row"><div class="dl">X光圖</div><div class="dv" style="color:var(--blue-dk)">${ob.xray.name}</div></div>`;
   if(ob&&ob.note)r+=`<div class="det-row"><div class="dl">備註</div><div class="dv">${ob.note}</div></div>`;
   if(ob&&ob.date)r+=`<div class="det-row"><div class="dl">就診日期</div><div class="dv">${ob.date}</div></div>`;
-  r+=`<div class="det-row"><div class="dl">SNOMED CT</div><div class="dv">${sm.snomed}</div></div>`;
-
+  r+=`<div class="det-row"><div class="dl">SNOMED CT</div><div class="dv" style="font-family:'JetBrains Mono',monospace;font-size:11px">${sm.snomed}</div></div>`;
   const el=document.getElementById(id);el.style.display='block';
-  el.innerHTML=`<div style="font-size:14px;font-weight:500;margin-bottom:10px">牙 ${fdi} ─ ${NAMES[fdi]}</div>
-    <div style="background:var(--gray50);border-radius:var(--radius);padding:10px 14px;border:1px solid var(--gray200)">${r}</div>
-    ${sm.adv?`<div class="advice-box">建議：${sm.adv}</div>`:'<div class="good-box">這顆牙目前狀態良好。</div>'}`;
+  el.innerHTML=`<div style="font-size:14px;font-weight:600;margin-bottom:9px">牙 ${fdi} ─ ${NAMES[fdi]||fdi}</div><div style="background:var(--g50);border-radius:var(--r);padding:9px 13px;border:1px solid var(--g200)">${r}</div>${sm.adv?`<div class="advice-box">建議：${sm.adv}</div>`:'<div class="good-box">這顆牙目前狀態良好。</div>'}`;
 }
 
-// ── OBS LIST ──
+// ══════════════════════════
+//  OBS LIST
+// ══════════════════════════
 function renderObsList(id,obs,pt){
   const items=Object.keys(obs).filter(f=>obs[f].status!=='h').map(f=>({fdi:f,...obs[f]}));
-  if(!items.length){
-    document.getElementById(id).innerHTML='<div style="text-align:center;padding:2rem;font-size:13px;color:var(--gray500)">所有牙齒狀態正常 🎉</div>';return;
-  }
-  document.getElementById(id).innerHTML=items.map(o=>{
-    const sm=S[o.status];
-    let ex='';
-    if(o.surfs)ex+='牙面：'+o.surfs+'<br>';
-    if(o.material)ex+='材料：'+o.material+'<br>';
-    if(o.depth)ex+='探針：'+o.depth+'mm<br>';
-    if(o.xray)ex+='X光：'+o.xray.name+'<br>';
-    if(o.note)ex+='備註：'+o.note+'<br>';
-    ex+='診所：'+(pt.lastClinic||'—')+'<br>';
-    ex+='SNOMED：'+sm.snomed;
-    return`<div class="tl-item" onclick="this.classList.toggle('open')">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:13px;font-weight:500">${NAMES[o.fdi]} <span style="color:var(--gray500);font-size:10px">FDI ${o.fdi}</span></div>
-          <div style="margin-top:3px;display:flex;gap:5px;align-items:center">
-            <span class="pill ${sm.pill}">${sm.lbl}</span>
-            ${o.xray?'<span style="font-size:10px;background:var(--blue-light);color:var(--blue-dark);padding:1px 6px;border-radius:10px">X光</span>':''}
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--gray500)">${o.date||''}</div>
-      </div>
-      <div class="tl-body">${ex}</div>
-    </div>`;}).join('');
+  if(!items.length){document.getElementById(id).innerHTML='<div style="text-align:center;padding:2rem;font-size:13px;color:var(--g500)">所有牙齒狀態正常 🎉</div>';return}
+  document.getElementById(id).innerHTML=items.map(o=>{const sm=S[o.status];let ex='';if(o.surfs)ex+='牙面：'+o.surfs+'<br>';if(o.material)ex+='材料：'+o.material+'<br>';if(o.depth)ex+='探針：'+o.depth+'mm<br>';if(o.xray)ex+='X光：'+o.xray.name+'<br>';if(o.note)ex+='備註：'+o.note+'<br>';ex+='診所：'+(pt.lastClinic||'—')+'<br>SNOMED：'+sm.snomed;return`<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[o.fdi]||o.fdi} <span style="color:var(--g500);font-size:10px;font-family:'JetBrains Mono',monospace">FDI ${o.fdi}</span></div><div style="margin-top:3px;display:flex;gap:4px;align-items:center"><span class="pill ${sm.pill}">${sm.lbl}</span>${o.xray?'<span style="font-size:10px;background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:10px">X光</span>':''}</div></div><div style="font-size:11px;color:var(--g500)">${o.date||''}</div></div><div class="tl-body">${ex}</div></div>`}).join('');
 }
 
-// ── PATIENT VIEW ──
+// ══════════════════════════
+//  PATIENT VIEW
+// ══════════════════════════
 function ptLogin(){
   const name=document.getElementById('pl-name').value.trim();
   const pid=document.getElementById('pl-id').value.trim().toUpperCase();
   const pt=DB[pid];
-  if(!pt||pt.name!==name){document.getElementById('pl-err').style.display='block';return}
-  document.getElementById('pl-err').style.display='none';
+  if(!pt||pt.name!==name){showToast('pl-err','tor');return}
+  loadPtView(pt);goPage('ptview');
+}
+function ptLogin2(){
+  const name=document.getElementById('pl2-name').value.trim();
+  const pid=document.getElementById('pl2-id').value.trim().toUpperCase();
+  const pt=DB[pid];
+  if(!pt||pt.name!==name){showToast('pl2-err-toast','tor');return}
   loadPtView(pt);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-ptview').classList.add('active');
-  document.querySelectorAll('.tnb').forEach((b,i)=>b.classList.toggle('on',i===2));
+  document.querySelectorAll('.ntb').forEach((b,i)=>b.classList.toggle('on',i===2));
 }
-function ptLogout(){
-  document.getElementById('pl-name').value='';document.getElementById('pl-id').value='';
-  goPage('plogin');
-}
+function ptLogout(){goPage('plogin')}
 
 function loadPtView(pt){
+  window._ptViewObs=pt.obs;
   document.getElementById('pt-av').textContent=pt.name[0];
   document.getElementById('pt-greet').textContent=pt.name+' 您好';
   document.getElementById('pt-meta2').textContent='最後就診 '+(pt.lastDate||'—')+' · '+(pt.lastClinic||'—');
   renderStats('pt-stats',pt.obs);
-  buildAnatomySVG(pt.obs);
-  // alerts
+  buildDentalChart('pt-arch-wrap',pt.obs,ptViewMode,showPtDetail);
   const alerts=Object.keys(pt.obs).filter(f=>['c','p','m'].includes(pt.obs[f].status));
-  document.getElementById('pt-alerts').innerHTML=alerts.length
-    ?alerts.map(f=>{const sm=S[pt.obs[f].status];return`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--gray100)"><div><div style="font-size:13px;font-weight:500">${NAMES[f]}</div><div style="font-size:11px;color:var(--gray600);margin-top:2px;line-height:1.5">${sm.adv}</div></div><span class="pill ${sm.pill}" style="margin-left:8px;flex-shrink:0">${sm.lbl}</span></div>`}).join('')
-    :'<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--gray500)">目前沒有需要特別注意的牙齒 🎉</div>';
-  // timeline
+  document.getElementById('pt-alerts').innerHTML=alerts.length?alerts.map(f=>{const sm=S[pt.obs[f].status];return`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--g100)"><div><div style="font-size:13px;font-weight:500">${NAMES[f]||f}</div><div style="font-size:11px;color:var(--g600);margin-top:2px;line-height:1.5">${sm.adv}</div></div><span class="pill ${sm.pill}" style="margin-left:8px;flex-shrink:0">${sm.lbl}</span></div>`}).join(''):'<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--g500)">目前沒有需要特別注意的牙齒 🎉</div>';
   const tItems=Object.keys(pt.obs).filter(f=>pt.obs[f].status!=='h');
-  document.getElementById('pt-tl').innerHTML=tItems.length
-    ?tItems.map(f=>{const sm=S[pt.obs[f].status];const o=pt.obs[f];return`<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[f]}</div><span class="pill ${sm.pill}" style="margin-top:3px">${sm.lbl}</span></div><div style="font-size:11px;color:var(--gray500)">${o.date||''}</div></div><div class="tl-body">${sm.adv?'建議：'+sm.adv+'<br>':''}診所：${pt.lastClinic||'—'}${o.note?'<br>說明：'+o.note:''}</div></div>`}).join('')
-    :'<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--gray500)">所有牙齒狀態正常</div>';
+  document.getElementById('pt-tl').innerHTML=tItems.length?tItems.map(f=>{const sm=S[pt.obs[f].status];const o=pt.obs[f];return`<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[f]||f}</div><span class="pill ${sm.pill}" style="margin-top:3px">${sm.lbl}</span></div><div style="font-size:11px;color:var(--g500)">${o.date||''}</div></div><div class="tl-body">${sm.adv?'建議：'+sm.adv+'<br>':''}診所：${pt.lastClinic||'—'}${o.note?'<br>說明：'+o.note:''}</div></div>`}).join(''):'<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--g500)">所有牙齒狀態正常</div>';
 }
+function showPtDetail(fdi,obs){showDetail('pt-detail-box',fdi,obs);document.getElementById('pt-detail-box').style.display='block'}
 
-// ══════════════════════════════════════════════
-//  ANATOMY SVG — 真實牙齒形狀
-// ══════════════════════════════════════════════
-function buildAnatomySVG(obs){
-  const svg=document.getElementById('oral-svg');svg.innerHTML='';
-  const ns='http://www.w3.org/2000/svg';
-  const W=640,gap=3,n=16,sx=12;
-  const cellW=(W-sx*2-(n-1)*gap)/n;
-
-  // tooth dimensions by type
-  function dims(type){
-    if(type==='i')return{cw:cellW*0.72,ch:cellW*1.1,rw:cellW*0.32,rh:cellW*0.65};
-    if(type==='c')return{cw:cellW*0.78,ch:cellW*1.2,rw:cellW*0.3,rh:cellW*0.75};
-    if(type==='p')return{cw:cellW*0.88,ch:cellW*0.95,rw:cellW*0.35,rh:cellW*0.65};
-    return{cw:cellW*1.0,ch:cellW*0.88,rw:cellW*0.42,rh:cellW*0.55}; // molar
-  }
-
-  function drawTooth(fdi,x,y,lower){
-    const st=(obs[fdi]&&obs[fdi].status)||'h';
-    const sm=S[st];
-    const type=TOOTH_TYPE[fdi]||'m';
-    const d=dims(type);
-    const cx=x+cellW/2;
-    const g=document.createElementNS(ns,'g');
-    g.style.cursor='pointer';
-
-    // === ROOT ===
-    const rootX=cx-d.rw/2;
-    const rootY=lower?y-d.rh:y+d.ch;
-    // root shape: narrowing trapezoid
-    const rootPath=lower
-      ?`M${rootX} ${rootY} Q${rootX-2} ${rootY+d.rh*0.6} ${cx} ${rootY+d.rh} Q${cx+d.rw/2+2} ${rootY+d.rh*0.6} ${rootX+d.rw} ${rootY} Z`
-      :`M${rootX} ${rootY+d.rh} Q${rootX-2} ${rootY+d.rh*0.4} ${cx} ${rootY} Q${cx+d.rw/2+2} ${rootY+d.rh*0.4} ${rootX+d.rw} ${rootY+d.rh} Z`;
-    const root=document.createElementNS(ns,'path');
-    root.setAttribute('d',rootPath);
-    root.setAttribute('fill','#F5D5A8');root.setAttribute('opacity','0.8');
-    if(st==='m')root.setAttribute('opacity','0.4');
-    g.appendChild(root);
-
-    // === CROWN based on type ===
-    const crownX=cx-d.cw/2;
-    const crownY=lower?y:y+(cellW*1.3-d.ch); // align bottom for upper, top for lower
-    // adjust: upper teeth hang down, lower teeth stand up
-    const cy2=lower?y-0:y;
-    const topY=lower?cy2:cy2;
-
-    let crownPath='';
-    if(type==='i'){
-      // incisor: trapezoid wider at gum, narrow at tip
-      const tx=cx-d.cw/2,bx=cx-d.cw*0.62,tw=d.cw,bw=d.cw*1.24;
-      if(!lower){
-        crownPath=`M${tx} ${topY} Q${cx} ${topY-4} ${tx+tw} ${topY}
-          L${bx+bw} ${topY+d.ch} Q${cx} ${topY+d.ch+3} ${bx} ${topY+d.ch} Z`;
-      } else {
-        crownPath=`M${bx} ${topY} Q${cx} ${topY-3} ${bx+bw} ${topY}
-          L${tx+tw} ${topY+d.ch} Q${cx} ${topY+d.ch+4} ${tx} ${topY+d.ch} Z`;
-      }
-    } else if(type==='c'){
-      // canine: triangular/pointed
-      const base=d.cw;
-      if(!lower){
-        crownPath=`M${cx-base/2} ${topY} Q${cx} ${topY-5} ${cx+base/2} ${topY}
-          L${cx+base*0.35} ${topY+d.ch} Q${cx} ${topY+d.ch+5} ${cx-base*0.35} ${topY+d.ch} Z`;
-      } else {
-        crownPath=`M${cx-base*0.35} ${topY} Q${cx} ${topY-5} ${cx+base*0.35} ${topY}
-          L${cx+base/2} ${topY+d.ch} Q${cx} ${topY+d.ch+5} ${cx-base/2} ${topY+d.ch} Z`;
-      }
-    } else if(type==='p'){
-      // premolar: slight bicuspid bumps
-      const rx=d.cw/2*0.88,ry=d.ch*0.5;
-      crownPath=`M${cx-rx} ${topY+d.ch}
-        Q${cx-rx-3} ${topY+d.ch*0.5} ${cx-rx} ${topY}
-        Q${cx-rx*0.3} ${topY-4} ${cx} ${topY-2}
-        Q${cx+rx*0.3} ${topY-4} ${cx+rx} ${topY}
-        Q${cx+rx+3} ${topY+d.ch*0.5} ${cx+rx} ${topY+d.ch}
-        Q${cx} ${topY+d.ch+2} ${cx-rx} ${topY+d.ch} Z`;
-    } else {
-      // molar: wide rectangular with rounded corners and cusp bumps
-      const rx=d.cw/2,ch=d.ch;
-      crownPath=`M${cx-rx} ${topY+ch}
-        Q${cx-rx-2} ${topY+ch*0.6} ${cx-rx} ${topY+ch*0.2}
-        Q${cx-rx*0.6} ${topY-3} ${cx-rx*0.2} ${topY-4}
-        Q${cx} ${topY-5} ${cx+rx*0.2} ${topY-4}
-        Q${cx+rx*0.6} ${topY-3} ${cx+rx} ${topY+ch*0.2}
-        Q${cx+rx+2} ${topY+ch*0.6} ${cx+rx} ${topY+ch}
-        Q${cx} ${topY+ch+2} ${cx-rx} ${topY+ch} Z`;
-    }
-
-    const crown=document.createElementNS(ns,'path');
-    crown.setAttribute('d',crownPath);
-    crown.setAttribute('fill',sm.fill);
-    crown.setAttribute('stroke',sm.stroke);
-    crown.setAttribute('stroke-width','0.8');
-    if(st==='m')crown.setAttribute('stroke-dasharray','2,1.5');
-    g.appendChild(crown);
-
-    // === DENTIN inner highlight ===
-    const dentin=document.createElementNS(ns,'ellipse');
-    dentin.setAttribute('cx',cx);
-    dentin.setAttribute('cy',topY+d.ch*0.45);
-    dentin.setAttribute('rx',d.cw*0.3);
-    dentin.setAttribute('ry',d.ch*0.25);
-    dentin.setAttribute('fill',sm.dentin);
-    dentin.setAttribute('opacity','0.55');
-    g.appendChild(dentin);
-
-    // === STATUS MARKS ===
-    if(st==='r'){
-      const fill=document.createElementNS(ns,'ellipse');
-      fill.setAttribute('cx',cx);fill.setAttribute('cy',topY+d.ch*0.42);
-      fill.setAttribute('rx',d.cw*0.22);fill.setAttribute('ry',d.ch*0.18);
-      fill.setAttribute('fill','#2196F3');fill.setAttribute('opacity','0.65');
-      g.appendChild(fill);
-    }
-    if(st==='c'){
-      const spot=document.createElementNS(ns,'ellipse');
-      spot.setAttribute('cx',cx);spot.setAttribute('cy',topY+d.ch*0.45);
-      spot.setAttribute('rx',d.cw*0.18);spot.setAttribute('ry',d.ch*0.14);
-      spot.setAttribute('fill','#E53935');spot.setAttribute('opacity','0.55');
-      g.appendChild(spot);
-    }
-    if(st==='p'){
-      for(let i=0;i<3;i++){
-        const line=document.createElementNS(ns,'line');
-        const lx=cx-d.cw*0.22+i*d.cw*0.22;
-        line.setAttribute('x1',lx);line.setAttribute('y1',lower?topY+d.ch*0.8:topY+d.ch*0.2);
-        line.setAttribute('x2',lx);line.setAttribute('y2',lower?topY+d.ch*0.2:topY+d.ch*0.8);
-        line.setAttribute('stroke','#F9A825');line.setAttribute('stroke-width','0.8');
-        line.setAttribute('stroke-dasharray','1.5,1');
-        g.appendChild(line);
-      }
-    }
-
-    // === FDI LABEL ===
-    const lbl=document.createElementNS(ns,'text');
-    const lblY=lower?topY+d.ch+d.rh+10:topY-d.rh-4;
-    lbl.setAttribute('x',cx);lbl.setAttribute('y',lblY);
-    lbl.setAttribute('text-anchor','middle');lbl.setAttribute('font-size','7');
-    lbl.setAttribute('fill','#5F6368');lbl.setAttribute('font-weight','600');
-    lbl.setAttribute('font-family','monospace');
-    lbl.textContent=fdi;g.appendChild(lbl);
-
-    g.addEventListener('click',()=>showPtDetail(fdi,obs));
-    g.addEventListener('mouseenter',()=>crown.setAttribute('opacity','0.7'));
-    g.addEventListener('mouseleave',()=>crown.setAttribute('opacity','1'));
-    svg.appendChild(g);
-  }
-
-  // layout: upper row y, lower row y
-  const upperRowY=50;   // crown starts here, root goes up
-  const lowerRowY=140;  // crown starts here, root goes down
-
-  FDI_U.forEach((f,i)=>{
-    const x=sx+i*(cellW+gap);
-    drawTooth(f,x,upperRowY,false);
-  });
-
-  // midline
-  const mid=upperRowY+cellW*1.0+18;
-  const ml=document.createElementNS(ns,'line');
-  ml.setAttribute('x1',sx);ml.setAttribute('y1',mid);ml.setAttribute('x2',W-sx);ml.setAttribute('y2',mid);
-  ml.setAttribute('stroke','#DADCE0');ml.setAttribute('stroke-width','0.8');ml.setAttribute('stroke-dasharray','5,4');
-  svg.appendChild(ml);
-  const mt=document.createElementNS(ns,'text');
-  mt.setAttribute('x',W/2);mt.setAttribute('y',mid+9);mt.setAttribute('text-anchor','middle');
-  mt.setAttribute('font-size','8');mt.setAttribute('fill','#9AA0A6');mt.setAttribute('font-family','sans-serif');
-  mt.textContent='上顎  ·  下顎';svg.appendChild(mt);
-
-  FDI_L.forEach((f,i)=>{
-    const x=sx+i*(cellW+gap);
-    drawTooth(f,x,lowerRowY,true);
-  });
-
-  // Legend
-  document.getElementById('svg-legend').innerHTML=Object.entries(S).map(([k,v])=>`
-    <div class="leg">
-      <div class="leg-dot" style="background:${v.fill};border:1px solid ${v.stroke}"></div>${v.lbl}
-    </div>`).join('');
-}
-
-function showPtDetail(fdi,obs){
-  const ob=obs[fdi];const st=ob?ob.status:'h';const sm=S[st];
-  let r=`<div class="det-row"><div class="dl">牙齒位置</div><div class="dv">${NAMES[fdi]}（FDI ${fdi}）</div></div>
-    <div class="det-row"><div class="dl">目前狀態</div><div class="dv"><span class="pill ${sm.pill}">${sm.lbl}</span></div></div>`;
-  if(ob&&ob.surfs)r+=`<div class="det-row"><div class="dl">受影響牙面</div><div class="dv">${ob.surfs}</div></div>`;
-  if(ob&&ob.material)r+=`<div class="det-row"><div class="dl">填補材料</div><div class="dv" style="font-size:12px">${ob.material}</div></div>`;
-  if(ob&&ob.depth)r+=`<div class="det-row"><div class="dl">探針深度</div><div class="dv">${ob.depth} mm</div></div>`;
-  if(ob&&ob.xray)r+=`<div class="det-row"><div class="dl">X光圖</div><div class="dv" style="color:var(--blue-dark)">已附掛 (${ob.xray.name})</div></div>`;
-  if(ob&&ob.note)r+=`<div class="det-row"><div class="dl">醫師說明</div><div class="dv">${ob.note}</div></div>`;
-  if(ob&&ob.date)r+=`<div class="det-row"><div class="dl">就診日期</div><div class="dv">${ob.date}</div></div>`;
-
-  const box=document.getElementById('pt-detail-box');box.style.display='block';
-  box.innerHTML=`
-    <div style="font-size:14px;font-weight:500;margin-bottom:10px">${NAMES[fdi]}</div>
-    <div style="background:var(--gray50);border-radius:var(--radius);padding:10px 14px;border:1px solid var(--gray200)">${r}</div>
-    ${sm.adv?`<div class="advice-box">建議：${sm.adv}</div>`:`<div class="good-box">這顆牙目前狀態良好。</div>`}`;
-}
-
-// ── COPY ──
-function copyNb(id){
-  const el=document.getElementById(id);
-  navigator.clipboard.writeText(el.innerText||el.textContent).then(()=>{
-    const orig=el.previousElementSibling;
-    if(orig&&orig.classList.contains('copy-btn')){orig.textContent='已複製 ✓';setTimeout(()=>{orig.textContent='複製'},1500);}
-  }).catch(()=>{});
-}
-
-// ── JSON HIGHLIGHT ──
-function hl(j){
-  return j
-    .replace(/("(?:[^"\\]|\\.)*")(\s*:)/g,'<span class="jk">$1</span>$2')
-    .replace(/:\s*("(?:[^"\\]|\\.)*")/g,': <span class="js">$1</span>')
-    .replace(/:\s*(\d+\.?\d*)/g,': <span class="jn">$1</span>')
-    .replace(/:\s*(true|false|null)/g,': <span class="jb">$1</span>');
-}
-
-// ── FHIR CODE PAGE ──
+// ══════════════════════════
+//  FHIR CODE PAGE
+// ══════════════════════════
 function renderCode(){
-  document.getElementById('c-struct').innerHTML=hl(JSON.stringify({
-    resourceType:'StructureDefinition',id:'TWDentalObservation',
-    url:'https://twdental.org/fhir/StructureDefinition/TWDentalObservation',
-    name:'TWDentalObservation',status:'draft',fhirVersion:'4.0.1',
-    differential:{element:[
-      {id:'Observation.extension:toothFDI',min:1,type:[{code:'Extension',profile:['https://twdental.org/fhir/StructureDefinition/tooth-fdi-number']}]},
-      {id:'Observation.extension:toothSurface',min:0,comment:'MODBL 牙面組合'},
-      {id:'Observation.extension:perioDepth',min:0,comment:'牙周探針深度 mm'},
-      {id:'Observation.extension:restorationMaterial',min:0,comment:'填補材料對應健保代碼'},
-      {id:'Observation.extension:mediaReference',min:0,comment:'附掛 X 光圖 Media resource'}
-    ]}
-  },null,2));
-
-  document.getElementById('c-code').innerHTML=hl(JSON.stringify({
-    resourceType:'CodeSystem',id:'tw-dental-material',
-    url:'https://twdental.org/fhir/CodeSystem/tw-dental-material',content:'complete',
-    concept:[
-      {code:'89013C',display:'複合樹脂'},{code:'89001C',display:'銀粉（汞齊合金）'},
-      {code:'89016C',display:'陶瓷貼片'},{code:'89008C',display:'玻璃離子'},
-      {code:'89031C',display:'氧化鋯全瓷冠'},{code:'89021C',display:'烤瓷熔附金屬冠'},
-      {code:'89040C',display:'臨時樹脂冠'},{code:'GUTTA',display:'根管充填 Gutta-percha'},
-      {code:'FLOW',display:'流動性複合樹脂'},{code:'TMPSEAL',display:'光固化暫封材'},
-      {code:'ZOE',display:'氧化鋅丁香油黏劑'},{code:'BOND',display:'牙科黏合劑 Bonding'},
-      {code:'FLUOR',display:'氟化物塗料 Fluoride Varnish'},{code:'DBA',display:'牙本質黏合系統 DBA'}
-    ]
-  },null,2));
-
-  const bundle={resourceType:'Bundle',type:'searchset',total:Object.keys(DB).length,
-    entry:Object.values(DB).map(p=>({resource:{
-      resourceType:'Patient',id:p.apid,
-      meta:{security:[{code:'N'}]},
-      name:[{text:p.name}],
-      managingOrganization:{reference:'Organization/'+p.oid}
-    }}))
-  };
-  document.getElementById('c-bundle').innerHTML=hl(JSON.stringify(bundle,null,2));
+  setFhirCode('c-struct',{resourceType:'StructureDefinition',id:'TWDentalObservation',url:'https://twdental.org/fhir/StructureDefinition/TWDentalObservation',name:'TWDentalObservation',status:'draft',fhirVersion:'4.0.1',differential:{element:[{id:'Observation.extension:toothFDI',min:1,type:[{code:'Extension',profile:['https://twdental.org/fhir/StructureDefinition/tooth-fdi-number']}]},{id:'Observation.extension:toothSurface',min:0,comment:'MODBL 牙面'},{id:'Observation.extension:perioDepth',min:0,comment:'牙周探針深度 mm'},{id:'Observation.extension:restorationMaterial',min:0,comment:'填補材料健保代碼'},{id:'Observation.extension:mediaReference',min:0,comment:'附掛 X 光 Media resource'}]}});
+  setFhirCode('c-code',{resourceType:'CodeSystem',id:'tw-dental-material',url:'https://twdental.org/fhir/CodeSystem/tw-dental-material',content:'complete',concept:[{code:'89013C',display:'複合樹脂'},{code:'89001C',display:'銀粉（汞齊合金）'},{code:'89016C',display:'陶瓷貼片'},{code:'89008C',display:'玻璃離子'},{code:'89031C',display:'氧化鋯全瓷冠'},{code:'89021C',display:'烤瓷熔附金屬冠'},{code:'89040C',display:'臨時樹脂冠'},{code:'GUTTA',display:'根管充填 Gutta-percha'},{code:'FLOW',display:'流動性複合樹脂'},{code:'TMPSEAL',display:'光固化暫封材'},{code:'ZOE',display:'氧化鋅丁香油黏劑'},{code:'BOND',display:'牙科黏合劑'},{code:'FLUOR',display:'氟化物塗料'},{code:'DBA',display:'牙本質黏合系統'}]});
+  setFhirCode('c-bundle',{resourceType:'Bundle',type:'searchset',total:Object.keys(DB).length,entry:Object.values(DB).map(p=>({resource:{resourceType:'Patient',id:p.apid,meta:{security:[{code:'N'}]},name:[{text:p.name}],managingOrganization:{reference:'Organization/'+p.oid}}}))});
 }
+
+// ══════════════════════════
+//  UTILS
+// ══════════════════════════
+function hl(j){return j.replace(/("(?:[^"\\]|\\.)*")(\s*:)/g,'<span class="jk">$1</span>$2').replace(/:\s*("(?:[^"\\]|\\.)*")/g,': <span class="js">$1</span>').replace(/:\s*(\d+\.?\d*)/g,': <span class="jn">$1</span>').replace(/:\s*(true|false|null)/g,': <span class="jb">$1</span>')}
+function copyEl(id){const el=document.getElementById(id);navigator.clipboard.writeText(el.innerText||el.textContent).then(()=>{const cb=el.closest('.nb-sec')?.querySelector('.copy-btn');if(cb){cb.textContent='✓';setTimeout(()=>cb.textContent='複製',1500)}}).catch(()=>{})}
+function showToast(id,cls){const t=document.getElementById(id);if(cls){t.className='toast '+cls}t.style.display='block';setTimeout(()=>t.style.display='none',2300)}
+
+// ── INIT ──
+buildArchInp();
+renderDbList();
 </script>
 </body>
 </html>
