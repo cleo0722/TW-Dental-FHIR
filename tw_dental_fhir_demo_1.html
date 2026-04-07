@@ -847,12 +847,12 @@ function drawToothSVG(cx, cy, type, isLower, status, baby){
   const sc=baby?0.80:1.0;
   const c=ST_COLORS[status];
 
-  // Tooth dimensions by type
+  // Tooth dimensions by type — scaled up for larger chart
   const dims={
-    i:{cw:10,ch:16,rw:5.5,rh:18,rn:1,cr:3},
-    c:{cw:10,ch:20,rw:5,rh:22,rn:1,cr:2.5},
-    p:{cw:13,ch:17,rw:6,rh:19,rn:2,cr:3.5},
-    m:{cw:18,ch:16,rw:7,rh:18,rn:3,cr:4}
+    i:{cw:14,ch:22,rw:7,rh:24,rn:1,cr:4},
+    c:{cw:14,ch:28,rw:7,rh:30,rn:1,cr:3.5},
+    p:{cw:18,ch:23,rw:8,rh:26,rn:2,cr:5},
+    m:{cw:26,ch:22,rw:10,rh:24,rn:3,cr:5.5}
   };
   const d=dims[type]||dims.m;
   const cw=d.cw*sc, ch=d.ch*sc, rw=d.rw*sc, rh=d.rh*sc;
@@ -973,7 +973,7 @@ function drawToothSVG(cx, cy, type, isLower, status, baby){
   const lblY=isLower?crownY+ch+rh+9:crownY-rh-4;
   lbl.setAttribute('x',cx);lbl.setAttribute('y',lblY);
   lbl.setAttribute('text-anchor','middle');
-  lbl.setAttribute('font-size','6.5');
+  lbl.setAttribute('font-size','9');
   lbl.setAttribute('fill','#80868B');
   lbl.setAttribute('font-weight','500');
   lbl.setAttribute('font-family','JetBrains Mono,monospace');
@@ -991,13 +991,13 @@ function buildDentalChart(containerId, obs, mode, clickCb){
   const {upper,lower}=modeRows(mode);
   const isBabyMode=(mode==='baby');
 
-  // Sizing
-  const toothW=22, gap=2;
+  // Sizing — larger teeth for better usability
+  const toothW=34, gap=3;
   const numTeeth=Math.max(upper.length,lower.length);
-  const totalW=numTeeth*(toothW+gap)+20;
-  const crownH=20*1.1, rootH=18*1.1;
-  const midGap=22; // space between arches at midline
-  const svgH=crownH*2+rootH*2+midGap+40;
+  const totalW=numTeeth*(toothW+gap)+24;
+  const crownH=28, rootH=26;
+  const midGap=28; // space between arches at midline
+  const svgH=crownH*2+rootH*2+midGap+52;
 
   const svg=document.createElementNS(ns,'svg');
   svg.setAttribute('viewBox',`0 0 ${totalW} ${svgH}`);
@@ -1038,7 +1038,7 @@ function buildDentalChart(containerId, obs, mode, clickCb){
     svg.appendChild(gum);
   });
 
-  const startX=10+(toothW+gap)/2;
+  const startX=12+(toothW+gap)/2;
 
   // --- Draw selected tooth highlight track ---
   const selHighlight=document.createElementNS(ns,'rect');
@@ -1105,8 +1105,8 @@ function buildDentalChart(containerId, obs, mode, clickCb){
   midLine.setAttribute('stroke-dasharray','5,4');
   svg.appendChild(midLine);
   const midLbl=document.createElementNS(ns,'text');
-  midLbl.setAttribute('x',totalW/2);midLbl.setAttribute('y',midY+4);
-  midLbl.setAttribute('text-anchor','middle');midLbl.setAttribute('font-size','7');
+  midLbl.setAttribute('x',totalW/2);midLbl.setAttribute('y',midY+5);
+  midLbl.setAttribute('text-anchor','middle');midLbl.setAttribute('font-size','10');
   midLbl.setAttribute('fill','#9AA0A6');midLbl.setAttribute('font-family','DM Sans,sans-serif');
   midLbl.textContent='上顎  ·  下顎';
   svg.appendChild(midLbl);
@@ -1264,12 +1264,60 @@ function updateNotepad(){
   const oid=genOrgId(orgName);
   const pid=document.getElementById('auto-pid').textContent;
   const ptName=document.getElementById('pt-name').value||'';
+  const ptId=document.getElementById('pt-idnum').value.trim()||'—';
+  const ptDob=document.getElementById('pt-dob').value||'';
+
+  // Organization always renders
   setFhirCode('nb-org-j',{resourceType:'Organization',id:oid,name:orgName});
-  if(pid!=='PID—'&&ptName)setFhirCode('nb-pat-j',{resourceType:'Patient',id:pid,name:[{text:ptName}],managingOrganization:{reference:'Organization/'+oid}});
-  else document.getElementById('nb-pat-j').textContent='尚未建立';
+
+  // Patient — always render, use placeholders when not yet filled
+  setFhirCode('nb-pat-j',{
+    resourceType:'Patient',
+    id:pid!=='PID—'?pid:'PID-PENDING',
+    meta:{profile:['https://twdental.org/fhir/StructureDefinition/TWDentalPatient']},
+    identifier:[{system:'https://twdental.org/id',value:ptId}],
+    name:[{text:ptName||'（尚未輸入）'}],
+    ...(ptDob?{birthDate:ptDob}:{}),
+    managingOrganization:{reference:'Organization/'+oid}
+  });
+
+  // Observation — full FHIR JSON for each saved tooth
   const obsKeys=Object.keys(TMP);
   document.getElementById('nb-obs-cnt').textContent=obsKeys.length+' 筆';
-  document.getElementById('nb-obs-j').textContent=obsKeys.length?obsKeys.map(f=>`Obs(FDI ${f}): ${S[TMP[f].status].lbl}${TMP[f].xray?' [X光]':''}${TMP[f].surfs?' 牙面:'+TMP[f].surfs:''}`).join('\n'):'尚無記錄';
+  if(obsKeys.length===0){
+    document.getElementById('nb-obs-j').textContent='// 點選牙位並儲存後產生';
+  } else {
+    // Show the first observation as full JSON; note count if more
+    const f=obsKeys[0];
+    const o=TMP[f];
+    const obsJson={
+      resourceType:'Observation',
+      id:o.id,
+      status:'final',
+      meta:{profile:['https://twdental.org/fhir/StructureDefinition/TWDentalObservation']},
+      category:[{coding:[{system:'http://terminology.hl7.org/CodeSystem/observation-category',code:'exam',display:'Exam'}]}],
+      code:{coding:[{system:'http://snomed.info/sct',code:'110481000',display:'Dental observation'}]},
+      subject:{reference:'Patient/'+(pid!=='PID—'?pid:'PID-PENDING')},
+      effectiveDateTime:(o.date||new Date().toISOString().slice(0,10))+'T00:00:00+08:00',
+      performer:[{reference:'Practitioner/DR-'+oid}],
+      valueCodeableConcept:{coding:[{system:'http://snomed.info/sct',code:S[o.status].snomed,display:S[o.status].lbl}]},
+      bodySite:{coding:[{system:'http://snomed.info/sct',code:'245648009',display:'Tooth structure'}]},
+      extension:[
+        {url:'https://twdental.org/fhir/StructureDefinition/tooth-fdi-number',valueCode:f},
+        ...(o.surfs?[{url:'https://twdental.org/fhir/StructureDefinition/tooth-surface',valueCode:o.surfs}]:[]),
+        ...(o.depth?[{url:'https://twdental.org/fhir/StructureDefinition/periodontal-pocket-depth',valueQuantity:{value:parseFloat(o.depth),unit:'mm',system:'http://unitsofmeasure.org',code:'mm'}}]:[]),
+        ...(o.material?[{url:'https://twdental.org/fhir/StructureDefinition/restoration-material',valueCoding:{system:'https://twdental.org/fhir/CodeSystem/tw-dental-material',display:o.material}}]:[])
+      ],
+      ...(o.note?{note:[{text:o.note}]}:{})
+    };
+    document.getElementById('nb-obs-j').innerHTML=hl(JSON.stringify(obsJson,null,2));
+    if(obsKeys.length>1){
+      const more=document.createElement('div');
+      more.style.cssText='font-size:11px;color:var(--g500);padding:4px 0 0;font-family:inherit';
+      more.textContent='// … 另外 '+(obsKeys.length-1)+' 筆 Observation（FDI: '+obsKeys.slice(1).join(', ')+'）';
+      document.getElementById('nb-obs-j').appendChild(more);
+    }
+  }
 }
 function setFhirCode(id,obj){document.getElementById(id).innerHTML=hl(JSON.stringify(obj,null,2))}
 
@@ -1418,5 +1466,3 @@ renderDbList();
 </script>
 </body>
 </html>
-
-
