@@ -661,32 +661,34 @@ tw_dental_v2_final.html
 
 ## 13. 未來展望
 
-##短期（3–6 個月）：基礎架構與標準建立
-完成 StructureDefinition 完整 snapshot（含 Observation 繼承欄位）
-提交至 HL7 台灣分部 進行標準審查
-新增 Encounter resource，完整描述單次就診流程
-支援 多牙位批次儲存（一次提交全口檢查資料）
-建立基礎資料庫：同步醫師診斷、X 光影像等預防與追蹤資料
-##中期（6–12 個月）：系統整合與功能升級
-整合 HAPI FHIR Server（由 localStorage 升級至 FHIR API）
-實作 SMART on FHIR 授權機制（OAuth 2.0 + PKCE）
-建立 Consent resource UI（病患隱私與授權管理）
-開發 六點牙周探針深度視覺化圖表
-建立 個人健康紀錄（PHR）系統（疼痛、過敏、病史）
-開發 2D 牙位圖互動輸入（精準標記疼痛與症狀）
-##長期（1 年以上）：AI 智慧醫療與產業落地
-串接 AI 影像分析（X 光蛀牙偵測）
-以 DiagnosticReport 呈現 AI 診斷結果
-建立 跨時空健康數據分析（歷史＋即時資料整合）
-實作 多維度分流機制
-急症優先（綠色通道）
-弱勢族群優先（偏鄉、長者）
-健康行為加權（回診與紀錄）
-非急症導流一般門診
-串接 健保署申報系統（自動填補材料申報）
-推廣至 診所 HIS 系統廠商
-建立 台灣牙科 FHIR Implementation Guide 標準
-推動正式納入 FHIR 國家標準體系
+## 短期（3–6 個月）：基礎架構與標準建立
+- 完成 StructureDefinition 完整 snapshot（含 Observation 繼承欄位）
+- 提交至 HL7 台灣分部 進行標準審查
+- 新增 Encounter resource，完整描述單次就診流程
+- 支援 多牙位批次儲存（一次提交全口檢查資料）
+- 建立基礎資料庫：同步醫師診斷、X 光影像等預防與追蹤資料
+
+## 中期（6–12 個月）：系統整合與功能升級
+- 整合 HAPI FHIR Server（由 localStorage 升級至 FHIR API）
+- 實作 SMART on FHIR 授權機制（OAuth 2.0 + PKCE）
+- 建立 Consent resource UI（病患隱私與授權管理）
+- 開發 六點牙周探針深度視覺化圖表
+- 建立 個人健康紀錄（PHR）系統（疼痛、過敏、病史）
+- 開發 2D 牙位圖互動輸入（精準標記疼痛與症狀）
+
+## 長期（1 年以上）：AI 智慧醫療與產業落地
+- 串接 AI 影像分析（X 光蛀牙偵測）
+- 以 DiagnosticReport 呈現 AI 診斷結果
+- 建立 跨時空健康數據分析（歷史＋即時資料整合）
+- 實作 多維度分流機制
+  - 急症優先（綠色通道）
+  - 弱勢族群優先（偏鄉、長者）
+  - 健康行為加權（回診與紀錄）
+  - 非急症導流一般門診
+- 串接 健保署申報系統（自動填補材料申報）
+- 推廣至 診所 HIS 系統廠商
+- 建立 台灣牙科 FHIR Implementation Guide 標準
+- 推動正式納入 FHIR 國家標準體系
 
 ---
 
