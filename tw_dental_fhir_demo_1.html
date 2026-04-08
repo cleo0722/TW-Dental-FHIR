@@ -170,7 +170,6 @@ select{cursor:pointer;appearance:none;
 .pt-hd{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fff;border:1px solid var(--g200);border-radius:var(--rlg);margin-bottom:14px}
 .pt-av{width:42px;height:42px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:var(--blue-dk);flex-shrink:0;border:2px solid var(--blue)}
 
-/* ══ DENTAL CHART WRAP — overflow visible so FDI labels never get clipped ══ */
 .dental-chart-wrap{
   background:#fff;
   border:1px solid var(--g200);
@@ -210,6 +209,7 @@ select{cursor:pointer;appearance:none;
 
 <div class="main">
 
+<!-- LOGIN PAGE -->
 <div class="page active" id="pg-login">
   <div class="login-wrap">
     <div class="login-card">
@@ -240,6 +240,7 @@ select{cursor:pointer;appearance:none;
   </div>
 </div>
 
+<!-- INPUT PAGE -->
 <div class="page" id="pg-inp">
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
@@ -358,6 +359,7 @@ select{cursor:pointer;appearance:none;
   </div>
 </div>
 
+<!-- DOCTOR VIEW PAGE -->
 <div class="page" id="pg-view">
   <div class="card"><div class="card-hd"><div class="dot" style="background:var(--blue)"></div>病人查詢</div>
     <div class="search-row"><input id="srch" type="text" placeholder="PID · 身分證號 · 姓名" style="flex:1;min-width:140px"><button class="btn btn-prim" onclick="doSearch()">查詢</button><select id="pt-sel" onchange="loadPt(this.value)" style="flex:1;min-width:160px"><option value="">— 清單選擇 —</option></select></div>
@@ -381,6 +383,7 @@ select{cursor:pointer;appearance:none;
   <div id="view-empty" style="padding:4rem;text-align:center;color:var(--g500);font-size:13px"><div style="font-size:36px;margin-bottom:10px">🔍</div>請輸入查詢條件</div>
 </div>
 
+<!-- PATIENT LOGIN PAGE -->
 <div class="page" id="pg-plogin">
   <div class="login-wrap">
     <div class="login-card">
@@ -394,6 +397,7 @@ select{cursor:pointer;appearance:none;
   </div>
 </div>
 
+<!-- PATIENT VIEW PAGE -->
 <div class="page" id="pg-ptview">
   <div class="pt-hd"><div class="pt-av" id="pt-av"></div><div><div id="pt-greet" style="font-size:15px;font-weight:600"></div><div id="pt-meta2" style="font-size:12px;color:var(--g600);margin-top:2px"></div></div><button class="btn btn-sm" onclick="ptLogout()" style="margin-left:auto">登出</button></div>
   <div class="g4" style="margin-bottom:14px" id="pt-stats"></div>
@@ -409,6 +413,7 @@ select{cursor:pointer;appearance:none;
   </div>
 </div>
 
+<!-- SECURITY PAGE -->
 <div class="page" id="pg-sec">
   <div style="font-size:19px;font-weight:600;margin-bottom:18px">資料安全架構</div>
   <div class="g2" style="margin-bottom:14px">
@@ -419,7 +424,6 @@ select{cursor:pointer;appearance:none;
       <div class="sec-item"><div class="sec-icon" style="background:var(--red-lt)">🔍</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">AuditEvent 稽核</div><div style="font-size:12px;color:var(--g600);line-height:1.6">每筆資料讀寫均產生 FHIR AuditEvent，保存 7 年。</div></div></div>
     </div>
     <div>
-      <div class="sec-item"><div class="sec-icon" style="background:#EDE7F6">📋</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Consent resource 授權管理</div><div style="font-size:12px;color:var(--g600);line-height:1.6">病人可透過 FHIR Consent 細粒度管理哪間診所可讀、有效期限設定。</div></div></div>
       <div class="sec-item"><div class="sec-icon" style="background:var(--green-lt)">🏥</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">跨院資料互通</div><div style="font-size:12px;color:var(--g600);line-height:1.6">每間診所有唯一 ORG ID，持有合法執照的牙醫師可直接查詢病人在任何診所的歷史 Observation，不需病人額外授權，實現真正的跨院資料共享。</div></div></div>
       <div class="sec-item"><div class="sec-icon" style="background:var(--yellow-lt)">💾</div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">localStorage 本地持久化（Demo）</div><div style="font-size:12px;color:var(--g600);line-height:1.6">Demo 環境使用 localStorage 持久化，關閉瀏覽器資料仍保留。</div></div></div>
     </div>
@@ -434,6 +438,7 @@ select{cursor:pointer;appearance:none;
   </div>
 </div>
 
+<!-- CODE PAGE -->
 <div class="page" id="pg-code">
   <div class="card"><div class="card-hd"><div class="dot" style="background:var(--blue)"></div>StructureDefinition — TWDentalObservation</div><div class="fhir-code" id="c-struct"></div></div>
   <div class="card"><div class="card-hd"><div class="dot" style="background:var(--green)"></div>CodeSystem — TW Dental Material</div><div class="fhir-code" id="c-code"></div></div>
@@ -586,9 +591,9 @@ function modeRows(mode){
   return{upper,lower};
 }
 
-// ══════════════════════════════════════════════════
-//  SVG DENTAL CHART  
-// ══════════════════════════════════════════════════
+// ══════════════════════════
+//  SVG DENTAL CHART
+// ══════════════════════════
 const ns='http://www.w3.org/2000/svg';
 
 function toothType(fdi){
@@ -703,14 +708,14 @@ function buildDentalChart(containerId,obs,mode,clickCb){
   const numTeeth=Math.max(upper.length,lower.length);
   const totalW=numTeeth*(toothW+gap)+24;
 
-  const FDI_LABEL_SPACE=20; 
+  const FDI_LABEL_SPACE=20;
   const crownH=18,rootH=16;
   const midGap=22;
 
-  const topPad=FDI_LABEL_SPACE+20; 
-  const upperGumY=topPad+rootH;          
-  const lowerGumY=upperGumY+crownH+midGap; 
-  const bottomPad=rootH+FDI_LABEL_SPACE+12; 
+  const topPad=FDI_LABEL_SPACE+20;
+  const upperGumY=topPad+rootH;
+  const lowerGumY=upperGumY+crownH+midGap;
+  const bottomPad=rootH+FDI_LABEL_SPACE+12;
   const svgH=lowerGumY+crownH+bottomPad;
 
   const svg=document.createElementNS(ns,'svg');
@@ -891,7 +896,7 @@ function saveObs(){
     note:document.getElementById('inp-note').value.trim(),
     xray:curXray,
     date,
-    clinic, // <--- Fix: 把診所存進單一 Observation 內
+    clinic,
     id:'obs-'+Date.now()
   };
   buildArchInp();updateSavedList();updateNotepad();showToast('t-obs','tok');
@@ -944,9 +949,9 @@ function updateNotepad(){
 function setFhirCode(id,obj){document.getElementById(id).innerHTML=hl(JSON.stringify(obj,null,2))}
 
 function buildBundle(pt){
-  const bundle={resourceType:'Bundle',type:'transaction',meta:{security:[{code:'N'}]},entry:[
+  const bundle={resourceType:'Bundle',type:'transaction',entry:[
     {resource:{resourceType:'Organization',id:pt.oid,name:pt.lastClinic}},
-    {resource:{resourceType:'Patient',id:pt.apid,meta:{security:[{code:'N'}]},identifier:[{system:'https://twdental.org/id',value:pt.pid}],name:[{text:pt.name}],birthDate:pt.dob,managingOrganization:{reference:'Organization/'+pt.oid}}},
+    {resource:{resourceType:'Patient',id:pt.apid,identifier:[{system:'https://twdental.org/id',value:pt.pid}],name:[{text:pt.name}],birthDate:pt.dob,managingOrganization:{reference:'Organization/'+pt.oid}}},
     ...Object.keys(pt.obs).slice(0,3).map(f=>({resource:{resourceType:'Observation',id:pt.obs[f].id,status:'final',meta:{profile:['https://twdental.org/fhir/StructureDefinition/TWDentalObservation']},subject:{reference:'Patient/'+pt.apid},effectiveDateTime:(pt.obs[f].date||'2026-01-01')+'T00:00:00+08:00',valueCodeableConcept:{coding:[{system:'http://snomed.info/sct',code:S[pt.obs[f].status].snomed,display:S[pt.obs[f].status].lbl}]},extension:[{url:'https://twdental.org/fhir/StructureDefinition/tooth-fdi-number',valueCode:f},...(pt.obs[f].surfs?[{url:'https://twdental.org/fhir/StructureDefinition/tooth-surface',valueCode:pt.obs[f].surfs}]:[]),...(pt.obs[f].depth?[{url:'https://twdental.org/fhir/StructureDefinition/periodontal-pocket-depth',valueQuantity:{value:parseFloat(pt.obs[f].depth),unit:'mm'}}]:[])]}}))
   ]};
   document.getElementById('nb-bun-j').innerHTML=hl(JSON.stringify(bundle,null,2));
@@ -1063,7 +1068,7 @@ function showPtDetail(fdi,obs){showDetail('pt-detail-box',fdi,obs);document.getE
 function renderCode(){
   setFhirCode('c-struct',{resourceType:'StructureDefinition',id:'TWDentalObservation',url:'https://twdental.org/fhir/StructureDefinition/TWDentalObservation',name:'TWDentalObservation',status:'draft',fhirVersion:'4.0.1',differential:{element:[{id:'Observation.extension:toothFDI',min:1,type:[{code:'Extension',profile:['https://twdental.org/fhir/StructureDefinition/tooth-fdi-number']}]},{id:'Observation.extension:toothSurface',min:0,comment:'MODBL 牙面'},{id:'Observation.extension:perioDepth',min:0,comment:'牙周探針深度 mm'},{id:'Observation.extension:restorationMaterial',min:0,comment:'填補材料健保代碼'},{id:'Observation.extension:mediaReference',min:0,comment:'附掛 X 光 Media resource'}]}});
   setFhirCode('c-code',{resourceType:'CodeSystem',id:'tw-dental-material',url:'https://twdental.org/fhir/CodeSystem/tw-dental-material',content:'complete',concept:[{code:'89013C',display:'複合樹脂'},{code:'89001C',display:'銀粉（汞齊合金）'},{code:'89016C',display:'陶瓷貼片'},{code:'89008C',display:'玻璃離子'},{code:'89031C',display:'氧化鋯全瓷冠'},{code:'89021C',display:'烤瓷熔附金屬冠'},{code:'89040C',display:'臨時樹脂冠'},{code:'GUTTA',display:'根管充填 Gutta-percha'},{code:'FLOW',display:'流動性複合樹脂'},{code:'TMPSEAL',display:'光固化暫封材'},{code:'ZOE',display:'氧化鋅丁香油黏劑'},{code:'BOND',display:'牙科黏合劑'},{code:'FLUOR',display:'氟化物塗料'},{code:'DBA',display:'牙本質黏合系統'}]});
-  setFhirCode('c-bundle',{resourceType:'Bundle',type:'searchset',total:Object.keys(DB).length,entry:Object.values(DB).map(p=>({resource:{resourceType:'Patient',id:p.apid,meta:{security:[{code:'N'}]},name:[{text:p.name}],managingOrganization:{reference:'Organization/'+p.oid}}}))});
+  setFhirCode('c-bundle',{resourceType:'Bundle',type:'searchset',total:Object.keys(DB).length,entry:Object.values(DB).map(p=>({resource:{resourceType:'Patient',id:p.apid,name:[{text:p.name}],managingOrganization:{reference:'Organization/'+p.oid}}}))});
 }
 
 // ══════════════════════════
