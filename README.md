@@ -105,7 +105,7 @@ start tw_dental_v2_final.html       # Windows
 xdg-open tw_dental_v2_final.html   # Linux
 
 # 方法二：GitHub Pages（線上 Demo）
-https://cleo0722.github.io/tw-dental-fhir/tw_dental_fhir_demo.html
+ https://dwz0907676455-bot.github.io/dental-fhir-demo/
 ```
 
 ### 4.3 完整 Demo 流程
