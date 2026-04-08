@@ -98,15 +98,14 @@ https://twdental.org/fhir/StructureDefinition/TWDentalObservation
 
 ### 4.2 啟動方式
 
-```bash
+```
 方法一：直接開啟（本機）
 open tw_dental_v2_final.html        # macOS
 start tw_dental_v2_final.html       # Windows
 xdg-open tw_dental_v2_final.html   # Linux
-
+```
 方法二：GitHub Pages（線上 Demo）
  https://dwz0907676455-bot.github.io/dental-fhir-demo/
-```
 
 ### 4.3 完整 Demo 流程
 
