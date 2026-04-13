@@ -53,6 +53,16 @@
 - **台灣 FHIR IG** 目前以 MedicationRequest、AllergyIntolerance 等為主，無牙科 Profile
 - **SNOMED CT** 雖有牙齒狀態代碼，但缺乏對應的本地化 Extension 結構
 - **健保申報代碼**（複合樹脂 89013C 等）與 FHIR 之間無橋接規範
+### 2.3 市場規模與資料交換缺口
+ 
+台灣每年牙科就診超過 **3,000 萬人次**，平均每位國民每年就診 1.3 次。然而：
+ 
+- **跨院資料交換標準幾乎不存在**：目前台灣牙科界無任何被廣泛採納的電子資料交換格式，各診所 HIS 系統封閉運作，資料無法跨院流通。
+- **重複醫療成本高**：病人換診所時，新診所平均需重新拍攝 X 光（費用約 500–1,500 元）、重做全口檢查（約 15–30 分鐘），保守估計每年造成 **數億元**的重複醫療支出。
+- **健保 IC 卡的限制**：IC 卡僅記錄最近 6 筆就醫資訊，且不含牙位、牙面、填補材料等臨床細節，對牙科連續性照護幾乎沒有幫助。
+- **轉診黑洞**：牙科轉介（如一般診所轉至口腔外科）時，前置診斷資料、影像、治療紀錄均無法隨同轉送，接收方醫師只能重新評估。
+ 
+> **核心問題**：台灣牙科缺乏一個所有診所都能讀寫的**標準化資料格式**。這正是本作品試圖解決的問題。
 
 ---
 
@@ -448,7 +458,155 @@ GET /Observation?patient=PID-001&category=exam&_include=Observation:performer
    ↓
 新診所 HIS 解析並呈現全口歷史圖
 ```
-
+### 7.4 跨院轉診完整情境：阻生齒手術轉介
+ 
+#### 情境背景
+ 
+> 王小明（32 歲）在**臺中陽光牙醫診所（診所 A）**進行定期檢查，
+> 牙醫師發現 **38 號牙（左下第三大臼齒）水平阻生**，
+> 建議轉介至**臺北口腔外科診所（診所 B）**進行手術拔除。
+ 
+---
+ 
+#### Step 1｜診所 A：發現問題，建立 FHIR Observation
+ 
+牙醫師在 Demo 系統點選 FDI `38`，記錄狀態「其他」並加入備註：
+ 
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "meta": {
+    "profile": ["https://twdental.org/fhir/StructureDefinition/TWDentalObservation"]
+  },
+  "valueCodeableConcept": {
+    "coding": [{
+      "system": "http://snomed.info/sct",
+      "code": "110481000",
+      "display": "Dental observation"
+    }]
+  },
+  "extension": [
+    {
+      "url": "https://twdental.org/fhir/StructureDefinition/tooth-fdi-number",
+      "valueCode": "38"
+    }
+  ],
+  "note": [{ "text": "水平阻生，建議轉介口腔外科評估手術拔除，已拍全口 X 光" }]
+}
+```
+ 
+同時產生 **Media resource** 攜帶 X 光影像參照，以及 **ServiceRequest** 轉診單。
+ 
+---
+ 
+#### Step 2｜產生 Transaction Bundle，POST 至 FHIR Server
+ 
+診所 A 的系統將以下 resource 打包成一個 transaction Bundle 上傳：
+ 
+```
+Bundle (transaction)
+├── Organization  → 臺中陽光牙醫診所（ORG-TC-001）
+├── Patient       → 王小明（PID-WANG-001）
+├── Encounter     → 本次就診紀錄（ENC-20260410-001）
+├── Observation   → FDI 38 阻生齒觀察（含備註）
+├── Media         → 全口 X 光影像參照
+└── ServiceRequest → 轉診至口腔外科（含轉診原因代碼）
+```
+ 
+---
+ 
+#### Step 3｜病人透過 SMART on FHIR 授權
+ 
+王小明收到授權通知（手機 App 或簡訊），確認授權台北口腔外科讀取其牙科紀錄：
+ 
+```json
+{
+  "resourceType": "Consent",
+  "status": "active",
+  "patient": { "reference": "Patient/PID-WANG-001" },
+  "provision": {
+    "period": { "start": "2026-04-10", "end": "2026-07-10" },
+    "actor": [{ "reference": "Organization/ORG-TP-002" }],
+    "action": [{ "coding": [{ "code": "access" }] }],
+    "class": [
+      { "code": "Observation" },
+      { "code": "Media" },
+      { "code": "ServiceRequest" }
+    ]
+  }
+}
+```
+ 
+授權範圍：**限台北口腔外科（ORG-TP-002）**、限 Observation / Media / ServiceRequest、有效期 90 天。
+ 
+---
+ 
+#### Step 4｜診所 B：調閱歷史資料
+ 
+台北口腔外科的 HIS 系統向 FHIR Server 查詢：
+ 
+```http
+GET /Observation?patient=PID-WANG-001&category=exam
+    &_include=Observation:performer
+    &_include=Observation:media
+ 
+Authorization: Bearer {access_token}  ← 已通過 OAuth 2.0 驗證
+```
+ 
+FHIR Server 驗證：
+- ✅ Access Token 有效
+- ✅ Consent resource 確認 ORG-TP-002 有讀取權限
+- ✅ 回傳 Bundle（含 Observation + Media 參照）
+ 
+---
+ 
+#### Step 5｜診所 B：還原牙位資訊，免重複檢查
+ 
+台北口腔外科 HIS 解析 Bundle 後呈現：
+ 
+```
+全口牙位圖（由 FHIR Observation 還原）
+┌─────────────────────────────────────────┐
+│  ...  37(健康)  [38 ⚠️ 阻生] ...        │
+└─────────────────────────────────────────┘
+ 
+  FDI 38｜左下第三大臼齒
+  狀態：需評估（阻生）
+  備註：水平阻生，臺中陽光牙醫轉介
+  X 光：[點擊查看 Media 影像]
+  記錄診所：臺中陽光牙醫診所
+  記錄日期：2026-04-10
+```
+ 
+**結果：**
+- ✅ 口腔外科醫師免重拍 X 光
+- ✅ 免重做全口評估
+- ✅ 完整掌握阻生角度、周邊牙位狀態
+- ✅ AuditEvent 自動記錄本次調閱（READ）
+ 
+---
+ 
+#### 轉診流程圖（摘要）
+ 
+```
+王小明掛號診所A
+      ↓
+牙醫師發現 FDI 38 阻生
+      ↓
+建立 Observation + Media + ServiceRequest Bundle
+      ↓
+POST → FHIR Server
+      ↓
+王小明手機 App 授權診所B（Consent resource）
+      ↓
+診所B 取得 Access Token（OAuth 2.0）
+      ↓
+GET /Observation?patient=PID-WANG-001 → FHIR Server 驗證 Consent
+      ↓
+診所B HIS 還原全口牙位圖 + X 光影像
+      ↓
+口腔外科直接評估，安排手術
 ---
 
 ## 8. 使用者角色說明
@@ -644,7 +802,38 @@ tw_dental_v2_final.html
 ---
 
 ## 13. 未來展望
-
+### 0. 落地策略：FHIR Facade 漸進式接入
+ 
+**最關鍵問題：診所 HIS 系統要怎麼接入這個標準？**
+ 
+台灣目前主要 HIS 廠商（如醫揚、昌達、佳醫等）的系統架構各異，要求全面改寫核心資料庫不現實。我們的落地方案採用 **FHIR Facade 架構**：
+ 
+```
+現有 HIS 系統（不需改動）
+        ↓
+  FHIR Facade 層（格式轉換 Middleware）
+  ├── 讀取 HIS 內部資料格式
+  ├── 轉換為符合 TWDentalObservation Profile 的 FHIR JSON
+  └── POST 至 FHIR Server（或 National FHIR Gateway）
+        ↓
+  FHIR R4 Server（HAPI FHIR 或衛福部 Gateway）
+        ↓
+  其他診所 / 醫院 / 病人 App 調閱
+```
+ 
+**Facade 的三個優點：**
+ 
+1. **零侵入**：HIS 廠商只需開放一個資料讀取 API 給 Facade，核心程式碼不動
+2. **漸進採用**：診所可先只輸出 FDI + 狀態（必填欄位），之後再逐步加入探針深度、影像
+3. **廠商中立**：Facade 是獨立 Middleware，可由衛福部、健保署或第三方整合商統一建置
+ 
+**商業模式選項：**
+ 
+| 路徑 | 執行者 | 可行性 |
+|------|--------|--------|
+| 衛福部建置國家級 FHIR Gateway | 政府 | 中期（2–3 年） |
+| HIS 廠商自行整合（市場壓力） | 廠商 | 短期（若標準被採納） |
+| 第三方整合商提供 SaaS Facade | 新創 | 短期（最快） |
 ## 短期（3–6 個月）：基礎架構與標準建立
 - 完成 StructureDefinition 完整 snapshot（含 Observation 繼承欄位）
 - 提交至 HL7 台灣分部 進行標準審查
