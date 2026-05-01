@@ -929,7 +929,7 @@ GET /Observation?patient=PID-001
 - 整合 **HAPI FHIR Server** 正式環境（由 localhost 升級至雲端）
 - 實作 **SMART on FHIR OAuth 2.0 + PKCE** 授權機制
 - 建立 Consent resource UI（病患隱私與授權管理介面）
-
+---
 ### 中期（6–12 個月）：系統整合與功能升級
 
 - 開發六點牙周探針深度視覺化圖表
