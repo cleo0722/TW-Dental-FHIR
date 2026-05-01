@@ -1,9 +1,14 @@
-# 台灣牙科口腔檢查 FHIR Profile 雛形
+# 台灣牙科口腔檢查 FHIR Profile
 
 **TW Dental Observation Profile — 跨診所牙齒狀態標準化交換格式**
 
-> 第二屆 FHIR 大健康 PROJECTATION 參賽作品
-> 隊伍：**牙起來**
+> 第二屆 FHIR 大健康 PROJECTATION 參賽作品  
+> 隊伍：**牙起來**  
+> Demo 系統版本：**v5.0**
+
+[![FHIR R4](https://img.shields.io/badge/FHIR-R4-blue)](https://hl7.org/fhir/R4/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://dwz0907676455-bot.github.io/dental-fhir-demo/)
 
 ---
 
@@ -14,27 +19,37 @@
 3. [解決方案](#3-解決方案)
 4. [Demo 系統快速上手](#4-demo-系統快速上手)
 5. [FHIR 技術規格](#5-fhir-技術規格)
-6. [資料安全設計](#6-資料安全設計)
-7. [系統架構與工作流程](#7-系統架構與工作流程)
-   - [7.5 跨院轉診實務情境（Referral Use Case）](#75-跨院轉診實務情境referral-use-case)
-8. [使用者角色說明](#8-使用者角色說明)
-9. [牙位編號系統（FDI）](#9-牙位編號系統fdi)
-10. [程式碼結構說明](#10-程式碼結構說明)
-11. [UI 元件設計說明](#11-ui-元件設計說明)
-12. [設計決策問答（師生討論）](#12-設計決策問答師生討論)
+6. [跨院轉診情境](#6-跨院轉診情境)
+7. [資料安全設計](#7-資料安全設計)
+8. [系統架構與工作流程](#8-系統架構與工作流程)
+9. [FHIR Server 整合](#9-fhir-server-整合)
+10. [落地策略：FHIR Facade](#10-落地策略fhir-facade)
+11. [牙位編號系統（FDI）](#11-牙位編號系統fdi)
+12. [程式碼結構說明](#12-程式碼結構說明)
 13. [變更記錄（Changelog）](#13-變更記錄changelog)
-14. [未來展望](#14-未來展望)
-15. [參考資料](#15-參考資料)
+14. [設計決策問答（師生討論）](#14-設計決策問答)
+15. [未來展望](#15-未來展望)
+16. [參考資料](#16-參考資料)
 
 ---
 
 ## 1. 專案背景
 
-台灣現有超過 **7,000 家** 牙醫診所，每年牙科就診人次超過 3,000 萬。然而各診所使用的醫療資訊系統（HIS）各自為政，資料格式五花八門，絕大多數仍是封閉的 Server-based 架構。一旦病人換診所、出外地就診，或轉介至牙科專科醫師，前一間診所的所有檢查紀錄便形同消失——病人只能靠口述，醫師只能重新拍 X 光、重新做全口檢查，造成重複醫療與資源浪費。
+台灣現有超過 **7,000 家**牙醫診所，每年牙科就診人次超過 **3,000 萬**。然而各診所使用的醫療資訊系統（HIS）各自為政，資料格式五花八門，絕大多數仍是封閉的 Server-based 架構。
 
-台灣的 FHIR 推動工作雖已有進展，但目前重心集中在大型醫學中心，**基層牙醫診所層級尚無對應的標準化 Profile**。國際現有的 FHIR Observation Profile 也缺乏牙科臨床必備欄位，如 FDI 牙位編號、牙面代碼、探針深度等。
+健康存摺（My Health Bank）雖然記錄了牙位與處置代碼，但它是**申報工具，不是臨床交換格式**：
 
-本作品嘗試填補這個缺口，建立台灣第一個牙科專屬的 FHIR Observation Profile 雛形，並附上可實際操作的 Demo 系統。
+| 健康存摺（Claim-based Data）| TWDentalObservation（Clinical Data）|
+|---|---|
+| 費用申報、民眾查閱 | 臨床診斷與決策支援 |
+| 肉眼查閱、手動輸入 | 系統介接、自動匯入 |
+| 無影像（純文字描述） | Media resource 附掛 X 光影像 |
+| 僅記錄過去處置 | 即時臨床觀察（Observation） |
+| 自費項目幾乎看不到 | 健保＋自費完整記錄 |
+
+一旦病人換診所、出外地就診，或轉介至牙科專科醫師，前一間診所的所有臨床紀錄便形同消失——病人只能靠口述，醫師只能重新拍 X 光、重新做全口檢查。
+
+本作品填補這個缺口，建立台灣第一個牙科專屬的 FHIR Observation Profile，並附上可實際操作的 Demo 系統，支援真實 FHIR R4 Server（HAPI FHIR）的 GET/POST 整合。
 
 ---
 
@@ -44,28 +59,29 @@
 
 | 角色 | 現況困境 |
 |------|---------|
-| **病人** | 換診所時無法攜帶完整牙齒檢查紀錄，只能口述病史 |
-| **牙醫師** | 僅能看到健保 IC 卡上最近 6 筆就醫紀錄，缺乏詳細牙位與治療內容 |
+| **病人** | 換診所時無法攜帶完整臨床紀錄，只能口述病史 |
+| **牙醫師** | 健保 IC 卡只有 6 筆就醫紀錄，缺乏牙位、探針深度、治療細節 |
 | **診所系統** | 各家 HIS 格式不同，跨院資料交換幾乎不可能 |
 | **轉診體系** | 轉介至牙周、口腔外科等專科時，前置診斷資料無法隨同轉送 |
 
-### 2.2 現有標準的不足
+### 2.2 健康存摺的三個根本限制
+
+**① 時間性問題**：記錄「過去做了什麼」，不知道「現在狀況如何」。補綴物是否磨損、是否有邊緣滲漏、是否有新生蛀牙——健康存摺完全不知道。
+
+**② 影像缺失**：有處置文字，但完全沒有 X 光影像。牙醫師需要影像才能看到根尖發炎、骨頭吸收、鄰接面蛀牙。換診所還是要重新拍。
+
+**③ 自費黑洞**：植牙、全瓷冠、隱形矯正等昂貴的自費項目，不走健保申報，健康存摺幾乎看不到。
+
+### 2.3 現有標準的不足
 
 - **國際 FHIR R4** 的 `Observation` resource 未定義牙位編號（FDI/Universal）
 - **台灣 FHIR IG** 目前以 MedicationRequest、AllergyIntolerance 等為主，無牙科 Profile
 - **SNOMED CT** 雖有牙齒狀態代碼，但缺乏對應的本地化 Extension 結構
 - **健保申報代碼**（複合樹脂 89013C 等）與 FHIR 之間無橋接規範
 
-### 2.3 市場規模與資料交換缺口
+### 2.4 市場規模
 
-台灣每年牙科就診超過 **3,000 萬人次**，平均每位國民每年就診 1.3 次。然而：
-
-- **跨院資料交換標準幾乎不存在**：目前台灣牙科界無任何被廣泛採納的電子資料交換格式，各診所 HIS 系統封閉運作，資料無法跨院流通。
-- **重複醫療成本高**：病人換診所時，新診所平均需重新拍攝 X 光（費用約 500–1,500 元）、重做全口檢查（約 15–30 分鐘），保守估計每年造成 **數億元**的重複醫療支出。
-- **健保 IC 卡的限制**：IC 卡僅記錄最近 6 筆就醫資訊，且不含牙位、牙面、填補材料等臨床細節，對牙科連續性照護幾乎沒有幫助。
-- **轉診黑洞**：牙科轉介（如一般診所轉至口腔外科）時，前置診斷資料、影像、治療紀錄均無法隨同轉送，接收方醫師只能重新評估。
-
-> **核心問題**：台灣牙科缺乏一個所有診所都能讀寫的**標準化資料格式**。這正是本作品試圖解決的問題。
+保守估計，每年僅有 1% 的就診（約 30 萬人次）發生跨院重複檢查，每次重新拍 X 光費用約 500–1,500 元，造成超過 **1.5 億元**的重複醫療支出。
 
 ---
 
@@ -74,29 +90,11 @@
 ### 3.1 核心設計原則
 
 1. **最小侵入性**：Profile 繼承自標準 `Observation`，僅透過 Extension 新增牙科欄位，確保與既有 FHIR 伺服器相容
-2. **本地化優先**：FDI 牙位系統在台灣與國際牙科界通用，Extension 設計完全對齊
+2. **本地化優先**：FDI 牙位系統在台灣與國際牙科界通用，Extension 設計完全對齊，並橋接健保申報代碼
 3. **漸進式採用**：Extension 除 `tooth-fdi-number` 外皆為選填，診所可依能力逐步實作
-4. **健保申報就緒**：填補材料代碼對應健保申報碼，為未來申報自動化奠定基礎
+4. **三方標準橋接**：FDI 國際牙位系統 × SNOMED CT 臨床代碼 × 健保申報代碼，台灣唯一整合設計
 
-### 3.2 資料模型設計：每顆牙一筆 Observation
-
-本 Profile 採用**每顆牙記一筆 Observation** 的設計。全口檢查最多產生 32 筆 Observation（成人），此設計已確認為合理的業界做法，理由如下：
-
-- 每顆牙的狀態（健康、蛀牙、填補等）具有獨立的臨床意義，適合以獨立 resource 表示
-- 可精確查詢單一牙位的歷史（見 §3.3）
-- 符合 FHIR Observation 的設計語義：一個 Observation 描述一個臨床觀察事實
-
-**同一顆牙的歷史追蹤**：每次就診建立新的 Observation（不覆蓋舊紀錄），形成完整時間軸。查詢時先以 `Patient ID` 定位病人，再以 `FDI 牙位編號`（Extension）進行過濾，即可還原單顆牙的完整治療歷程：
-
-```http
-GET /Observation?patient=PID-001
-                &extension=tooth-fdi-number|26
-                &_sort=-date
-```
-
-**AI 影像整合**：未來整合 X 光與 AI 判讀時，維持以 `Observation` 建模單顆牙，再由 `DiagnosticReport` 參照多筆 Observation，彙整整體診斷結果，不需改動現有 Profile 結構。
-
-### 3.3 新增的牙科 Extension
+### 3.2 新增的牙科 Extension
 
 ```
 TWDentalObservation
@@ -107,7 +105,7 @@ TWDentalObservation
 └── extension[media-reference]              選填  X 光影像（參照 Media resource）
 ```
 
-### 3.4 Profile URL
+### 3.3 Profile URL
 
 ```
 https://twdental.org/fhir/StructureDefinition/TWDentalObservation
@@ -124,123 +122,130 @@ https://twdental.org/fhir/StructureDefinition/TWDentalObservation
 | 瀏覽器 | Chrome / Firefox / Safari / Edge（現代版本） |
 | 伺服器 | **不需要**，直接開啟 HTML 即可 |
 | 外部套件 | **不需要**，單一 HTML 自給自足 |
-| 資料儲存 | `localStorage`（關閉後仍保留） |
+| 資料儲存 | `localStorage`（關閉後仍保留）+ 真實 HAPI FHIR Server |
 
 ### 4.2 啟動方式
 
+```bash
+# 方法一：直接開啟（本機）
+open tw_dental_v5.html          # macOS
+start tw_dental_v5.html         # Windows
+xdg-open tw_dental_v5.html     # Linux
 ```
-方法一：直接開啟（本機）
-open tw_dental_v2_final.html        # macOS
-start tw_dental_v2_final.html       # Windows
-xdg-open tw_dental_v2_final.html   # Linux
+
+**方法二：GitHub Pages（線上 Demo）**
 ```
-方法二：GitHub Pages（線上 Demo）
-https://dwz0907676455-bot.github.io/2.0_dental-fhir-demo/dental_fhir_v5%20(1)
+https://dwz0907676455-bot.github.io/dental-fhir-demo/
+```
 
 ### 4.3 完整 Demo 流程
 
 #### Step 1 — 牙醫師登入
 
 1. 在登入頁面點選「**醫師**」分頁
-2. 輸入任意「執照號碼」（數字即可）與「醫師姓名」
-3. 輸入所屬診所名稱（預設：臺中陽光牙醫診所）
-4. 點擊「**登入診療系統**」進入主畫面
+2. 輸入任意執照號碼（數字即可）與姓名
+3. 輸入診所名稱（預設：臺中陽光牙醫診所）
+4. 點擊「**登入診療系統**」
 
-> **提醒**：Demo 環境不驗證執照號碼，任意數字均可登入
+> **Demo 提示**：任意數字執照號碼 + 姓名均可登入
 
 #### Step 2 — 讀取健保卡（模擬）
 
-1. 進入「**牙醫師輸入**」頁面
-2. 點擊「**模擬讀卡（Demo）**」，系統會自動循環填入三位示範病人：
+點擊「**模擬讀卡（Demo）**」，系統循環填入 13 位示範病人：
 
 | 姓名 | 身分證號 |
 |------|---------|
-| 王小明 | A123456789 |
-| 李美華 | B234567890 |
-| 陳大偉 | C345678901 |
+| 王小明 | A199000001 |
+| 李美華 | B299000002 |
+| 陳大偉 | C199000003 |
+| ... | ... |
 
 #### Step 3 — 記錄口腔檢查
 
-1. 在上方**全口牙位圖**點擊任意牙齒（圖示會顯示選取光暈）
-2. 在中欄「**檢查記錄**」選擇牙齒狀態：
+1. 在全口牙位圖點擊任意牙齒
+2. 選擇牙齒狀態：
 
-| 狀態 | 說明 | SNOMED CT |
-|------|------|-----------|
-| ✓ 健康 | 正常牙齒 | 2667000 |
-| ● 蛀牙 | 可進一步選牙面（M/O/D/B/L） | 80967001 |
-| ◆ 已填補 | 可選牙面與填補材料（14 種健保代碼） | 413502000 |
-| ○ 缺牙 | 無此顆牙齒 | 80515008 |
-| ▲ 牙周問題 | 可輸入探針深度（mm） | 37532009 |
-| — 其他 | 其他狀況 | 110481000 |
+| 狀態 | SNOMED CT | 說明 |
+|------|-----------|------|
+| ✓ 健康 | 2667000 | 正常牙齒 |
+| ● 蛀牙 | 80967001 | 可選牙面（M/O/D/B/L） |
+| ◆ 已填補 | 413502000 | 可選牙面與健保材料代碼 |
+| ○ 缺牙 | 80515008 | 無此顆牙齒 |
+| ▲ 牙周問題 | 37532009 | 可輸入探針深度（mm） |
+| — 其他 | 110481000 | 其他狀況 |
 
 3. 可選填：醫師備註、X 光影像（JPG/PNG）
 4. 點擊「**儲存此牙位 Observation**」
-5. 重複步驟 1–4 記錄多顆牙齒
-6. 確認後點擊「**完成並儲存至 FHIR（localStorage）**」
+5. 點擊「**🚀 儲存 + POST 至 FHIR Server**」上傳至 HAPI FHIR
 
-> **觀察重點**：右側 FHIR 記事本會即時顯示 Organization、Patient、Observation 的完整 JSON 結構
+#### Step 4 — 從 FHIR Server 跨院調閱
 
-#### Step 4 — 牙醫師查看（模擬跨院調閱）
+1. 切換至「**牙醫師查看**」頁面
+2. 在「從 FHIR Server 查詢病人」欄輸入 HAPI Patient ID
+3. 系統自動執行：
+   ```
+   GET /Patient/{id}
+   GET /Observation?subject={id}&_sort=-date
+   GET /Encounter?patient={id}&_sort=-date
+   ```
+4. 還原全口牙位圖與 Encounter 時序清單
 
-1. 點選上方導覽「**牙醫師查看**」
-2. 在搜尋欄輸入病人姓名或身分證號，或從下拉選單選擇
-3. 即可看到全口牙位圖（顏色標示各牙狀態）、統計數字、Observation 清單
-4. 點擊牙位圖上的牙齒，可查看該牙詳細紀錄與 SNOMED CT 代碼
+#### Step 5 — 跨院場景模擬
 
-#### Step 5 — 病人查看（SMART on FHIR 情境）
+點選「**跨院場景**」頁面，五步驟動畫展示：
 
-1. 點選上方導覽「**病人查看**」
-2. 輸入姓名與身分證號（同 Step 2 讀卡資料）
-3. 病人可查看：全口狀態圖、需注意事項、就診紀錄時間軸
+```
+A 診所建檔 → 上傳 FHIR → 病人授權（Consent）→ B 醫院查閱 → 完成接軌
+```
 
-#### Step 6 — 確認 FHIR 技術深度
+#### Step 6 — API Explorer
 
-1. 點選「**FHIR 程式碼**」頁籤
-2. 可看到：
-   - `StructureDefinition` — TWDentalObservation 的 differential 定義
-   - `CodeSystem` — tw-dental-material（14 種填補材料與健保代碼）
-   - `Bundle` — 目前 localStorage 中所有病人的 Patient Bundle 預覽
+點選「**🔗 API Explorer**」，模擬 FHIR REST API 回應：
+
+- `GET /Patient` — 所有病人清單
+- `GET /Patient/{id}` — 個別病人
+- `GET /Patient/{id}/$everything` — 病人全量資料
+- `GET /metadata` — CapabilityStatement
 
 ---
 
 ## 5. FHIR 技術規格
 
-### 5.1 必填欄位（Cardinality 1..1 或 1..*）
+### 5.1 資源層次架構
 
-| 欄位路徑 | 型別 | 必填性 | 說明 |
-|---------|------|--------|------|
-| `resourceType` | string | 1..1 | 固定值 `"Observation"` |
-| `meta.profile` | canonical | 1..* | 指向本 Profile URL |
-| `status` | code | 1..1 | `final` \| `preliminary` \| `amended` |
-| `category` | CodeableConcept | 1..1 | `exam`（口腔例行檢查） |
-| `code` | CodeableConcept | 1..1 | SNOMED CT `110481000`（Dental observation） |
-| `subject` | Reference(Patient) | 1..1 | 參照 Patient resource |
-| `encounter` | Reference(Encounter) | 1..1 | 參照本次 Encounter |
-| `effectiveDateTime` | dateTime | 1..1 | ISO 8601 含台灣時區 `+08:00` |
-| `performer` | Reference(Practitioner) | 1..* | 執行牙醫師 |
-| `valueCodeableConcept` | CodeableConcept | 1..1 | SNOMED CT 牙齒狀態代碼 |
-| `bodySite` | CodeableConcept | 1..1 | SNOMED CT 牙齒解剖位置 |
-| `extension[tooth-fdi-number]` | Extension | 1..1 | FDI 牙位編號（本 Profile 核心） |
+```
+Patient（長期累積）
+└── Encounter（每次就診一筆）
+    ├── Observation × N（每顆牙一筆，含 FDI extension）
+    └── DiagnosticReport（有 X 光時自動產生，result 參照 Observation）
+```
 
-### 5.2 選填欄位（Cardinality 0..1）
+### 5.2 必填欄位（Cardinality 1..1 或 1..*）
+
+| 欄位路徑 | 型別 | 說明 |
+|---------|------|------|
+| `resourceType` | string | 固定值 `"Observation"` |
+| `meta.profile` | canonical | 指向本 Profile URL |
+| `status` | code | `final` \| `preliminary` \| `amended` |
+| `category` | CodeableConcept | `exam`（口腔例行檢查） |
+| `code` | CodeableConcept | SNOMED CT `110481000`（Dental observation） |
+| `subject` | Reference(Patient) | 參照 Patient resource |
+| `encounter` | Reference(Encounter) | 參照本次 Encounter |
+| `effectiveDateTime` | dateTime | ISO 8601 含台灣時區 `+08:00` |
+| `performer` | Reference(Practitioner) | 執行牙醫師 |
+| `valueCodeableConcept` | CodeableConcept | SNOMED CT 牙齒狀態代碼 |
+| `bodySite` | CodeableConcept | SNOMED CT 牙齒解剖位置 |
+| `extension[tooth-fdi-number]` | Extension | FDI 牙位編號（本 Profile 核心） |
+
+### 5.3 選填欄位（Cardinality 0..1）
 
 | Extension URL | 型別 | 說明 |
 |--------------|------|------|
-| `extension[tooth-surface]` | valueCode | 牙面代碼：M（近中）O（咬合）D（遠中）B（頰側）L（舌側），可多字元組合 |
-| `extension[periodontal-pocket-depth]` | valueQuantity | 牙周探針深度（unit: mm，UCUM: `mm`） |
-| `extension[restoration-material]` | valueCoding | 填補材料，binding 至 `tw-dental-material` CodeSystem |
-| `extension[media-reference]` | valueReference | 參照 FHIR Media resource（X 光影像） |
+| `extension[tooth-surface]` | valueCode | 牙面代碼：M（近中）O（咬合）D（遠中）B（頰側）L（舌側）|
+| `extension[periodontal-pocket-depth]` | valueQuantity | 牙周探針深度（unit: mm，UCUM: `mm`）|
+| `extension[restoration-material]` | valueString | 填補材料（健保代碼，如 89013C）|
+| `extension[media-reference]` | valueReference | 參照 FHIR Media resource（X 光影像）|
 | `note` | Annotation | 牙醫師自由文字備註 |
-| `component` | BackboneElement | 牙周六點探針深度（近中頰、中頰、遠中頰、近中舌、中舌、遠中舌） |
-
-### 5.3 使用的代碼系統
-
-| CodeSystem | 用途 | 範例 |
-|-----------|------|------|
-| SNOMED CT (`http://snomed.info/sct`) | 牙齒狀態、解剖位置 | `80967001` 蛀牙 |
-| FDI 牙位系統（自訂） | 兩碼牙位編號 | `26`（左上第一大臼齒） |
-| UCUM (`http://unitsofmeasure.org`) | 探針深度單位 | `mm` |
-| tw-dental-material（本地） | 填補材料對應健保代碼 | `89013C`（複合樹脂） |
 
 ### 5.4 SNOMED CT 牙齒狀態對照表
 
@@ -306,8 +311,8 @@ URL：`https://twdental.org/fhir/CodeSystem/tw-dental-material`
       }
     ]
   },
-  "subject": { "reference": "Patient/PID20260405001" },
-  "encounter": { "reference": "Encounter/ENC-20260405-001" },
+  "subject": { "reference": "Patient/A199000001" },
+  "encounter": { "reference": "Encounter/enc-20260405-001" },
   "effectiveDateTime": "2026-04-05T10:30:00+08:00",
   "performer": [
     { "reference": "Practitioner/DR-1234567" }
@@ -355,49 +360,152 @@ URL：`https://twdental.org/fhir/CodeSystem/tw-dental-material`
 }
 ```
 
+### 5.7 Encounter Resource（Q3：每次就診一筆）
+
+```json
+{
+  "resourceType": "Encounter",
+  "id": "enc-20260405-001",
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "serviceType": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "394578005",
+        "display": "Dental specialty"
+      }
+    ]
+  },
+  "subject": { "reference": "Patient/A199000001" },
+  "serviceProvider": { "reference": "Organization/ORG-109890" },
+  "period": {
+    "start": "2026-04-05T08:00:00+08:00",
+    "end": "2026-04-05T08:30:00+08:00"
+  },
+  "participant": [
+    {
+      "individual": {
+        "reference": "Practitioner/DR-1234567",
+        "display": "林大明醫師"
+      }
+    }
+  ]
+}
+```
+
+### 5.8 DiagnosticReport（Q4：有 X 光時自動產生）
+
+```json
+{
+  "resourceType": "DiagnosticReport",
+  "id": "dr-20260405-001",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "57833-8",
+          "display": "Dental X-ray"
+        }
+      ]
+    }
+  ],
+  "subject": { "reference": "Patient/A199000001" },
+  "encounter": { "reference": "Encounter/enc-20260405-001" },
+  "effectiveDateTime": "2026-04-05T08:15:00+08:00",
+  "result": [
+    {
+      "reference": "Observation/obs-26",
+      "display": "FDI 26 蛀牙"
+    },
+    {
+      "reference": "Observation/obs-36",
+      "display": "FDI 36 牙周問題"
+    }
+  ],
+  "conclusion": "FDI 26 有明顯蛀蝕，建議 MOD 填補。FDI 36 牙周袋深度 5.5mm，建議深部清潔。"
+}
+```
+
 ---
 
-## 6. 資料安全設計
+## 6. 跨院轉診情境
 
-### 6.1 SMART on FHIR OAuth 2.0
+### 6.1 阻生齒手術轉介完整流程
 
-- 病人與診所均須透過 OAuth 2.0 授權流程取得 Access Token
-- Access Token 有效期限：**15 分鐘**（短效設計，降低洩漏風險）
-- 搭配 Refresh Token 機制，確保正常操作不中斷
-
-### 6.2 Consent 授權模式：病人機構授權（可撤銷）
-
-台灣牙科情境採用**病人授權特定醫院**的模式，而非逐次授權，理由是最符合實務流程：
-
-病人**首次至某醫院就診**時，授權該醫院可調閱其全部（或特定專科，如牙科）的**過去與未來**產生的病歷及健康紀錄。此授權可隨時由病人主動撤銷。
+**情境**：王小明在臺中陽光牙醫診所（診所 A）發現 FDI 38 水平阻生，轉介至台南成大附屬醫院（機構 B）進行手術拔除。
 
 ```
-病人首次至大心醫院就診
-    │
-    ├── 授權範圍：牙科相關 Observation / Media / DiagnosticReport
-    ├── 時間範圍：過去至未來（不限單次 Encounter）
-    ├── 授權對象：大心醫院（ORG-TP-DAXIN-002）
-    └── 撤銷方式：病人隨時可透過 SMART on FHIR App 取消授權
+Step 1｜診所 A 發現問題
+   牙醫師記錄 FDI 38，狀態「其他」，備註：水平阻生
+   系統產生 Observation + Media（X光）+ ServiceRequest
+        ↓
+Step 2｜打包 Bundle → POST 至共享 FHIR Server
+   Organization + Patient + Encounter + Observation + DiagnosticReport
+   POST https://fhir.nhis.gov.tw/R4/Bundle
+        ↓
+Step 3｜病人透過 SMART on FHIR App 授權
+   Consent resource：授權 ORG-654321（成大）讀取 90 天
+        ↓
+Step 4｜機構 B 持 Access Token 查詢
+   GET /Patient/PID001/$everything
+   → 回傳 Patient + Encounter + Observation + DiagnosticReport
+        ↓
+Step 5｜機構 B 還原牙位資訊
+   ✅ 免重拍 X 光  ✅ 免重做全口評估  ✅ 直接安排手術
 ```
 
-此模式對應的 Consent resource `provision` 不限定單一 Encounter，而是以 `class`（資源類型）為範圍，搭配 `period` 設定有效期。
+### 6.2 FHIR 查詢範例
 
-### 6.3 Patient ID 與身分資料分離
+```bash
+# 查一顆牙的跨次就診歷史（Q2）
+GET /Observation?subject=PID001
+    &extension=https://twdental.org/fhir/StructureDefinition/tooth-fdi-number|26
+    &_sort=-date
+
+# 查病人所有就診 Encounter（Q3）
+GET /Encounter?patient=PID001&_sort=-date
+
+# 查特定 Encounter 的所有 Observation
+GET /Observation?encounter=enc-20260310
+
+# 查有 DiagnosticReport 的 X 光（Q4）
+GET /DiagnosticReport?subject=PID001&category=dental
+
+# 跨院授權後全量查詢
+GET /Patient/PID001/$everything
+```
+
+---
+
+## 7. 資料安全設計
+
+### 7.1 SMART on FHIR OAuth 2.0 + PKCE
+
+- 病人透過 SMART on FHIR 授權機制存取個人資料
+- Access Token 有效期限：**15 分鐘**（短效設計）
+- PKCE 流程防止 authorization code 被截取
+- 搭配 Refresh Token 確保正常操作不中斷
+
+### 7.2 Patient ID 與身分資料分離
 
 ```
-FHIR Layer（對外流通）       私密資料庫（加密儲存）
-─────────────────            ─────────────────────
-Patient.id: PID-001   ←→    身分證號: A123456789
-Observation.subject          姓名、生日（加密）
+FHIR Layer（對外流通）          私密資料庫（加密儲存）
+────────────────────            ─────────────────────
+Patient.id: PID-001   ←→       身分證號: A199000001
+Observation.subject              姓名、生日（AES-256 加密）
 ```
 
 - FHIR resource 中僅流通系統內部 PID，不含身分證號
-- 身分證號以 **AES-256** 加密儲存於獨立資料庫
-- 身分查驗僅在登入驗證時進行，之後全程用 PID
+- 身分查驗僅在登入時進行，之後全程用 PID
 
-### 6.4 AuditEvent（FHIR R4）
-
-每筆資料存取均自動產生 `AuditEvent` resource：
+### 7.3 AuditEvent 稽核（7 年保存）
 
 ```json
 {
@@ -411,301 +519,170 @@ Observation.subject          姓名、生日（加密）
 ```
 
 - 記錄操作者、時間戳記、IP、動作類型（READ / CREATE / UPDATE / DELETE）
-- 保存期限：**7 年**（符合醫療資訊保存規定）
-- 未授權存取嘗試記錄 DENY 事件並觸發警示
+- 未授權存取記錄 DENY 事件並觸發警示
+
+### 7.4 Consent Resource 細粒度授權
+
+```json
+{
+  "resourceType": "Consent",
+  "status": "active",
+  "patient": { "reference": "Patient/PID-001" },
+  "provision": {
+    "period": { "start": "2026-04-05", "end": "2026-07-05" },
+    "actor": [{ "reference": "Organization/ORG-654321" }],
+    "action": [{ "coding": [{ "code": "access" }] }],
+    "class": [
+      { "code": "Observation" },
+      { "code": "DiagnosticReport" },
+      { "code": "Encounter" }
+    ]
+  }
+}
+```
+
+病人可細粒度設定：哪間診所可讀取、哪類 resource 可存取、有效期限至何時。
 
 ---
 
-## 7. 系統架構與工作流程
+## 8. 系統架構與工作流程
 
-### 7.1 整體架構（目標架構）
+### 8.1 整體架構（目標架構）
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                        病人端                            │
 │  手機 App（SMART on FHIR）   瀏覽器 Patient Portal       │
 └───────────────────┬─────────────────────────────────────┘
-                    │ OAuth 2.0
+                    │ OAuth 2.0 + PKCE
 ┌───────────────────▼─────────────────────────────────────┐
 │              FHIR R4 API Gateway（TLS 1.3）              │
-│   /Patient  /Observation  /Bundle  /AuditEvent  /Consent │
+│  /Patient  /Observation  /Encounter  /DiagnosticReport   │
+│  /Bundle   /AuditEvent   /Consent   /ServiceRequest      │
 └──────┬─────────────┬──────────────┬──────────────────────┘
        │             │              │
 ┌──────▼──────┐ ┌────▼─────┐ ┌─────▼──────┐
-│ 診所 A HIS  │ │ 診所 B   │ │ 牙科專科院 │
-│（臺北）     │ │ HIS（臺中）│ │（轉介接收）│
+│  診所 A HIS │ │ 診所 B   │ │  牙科專科院 │
+│（臺中）     │ │ HIS（台南）│ │（轉介接收） │
 └─────────────┘ └──────────┘ └────────────┘
 ```
 
-### 7.2 就診流程（詳細）
+### 8.2 就診資料建立流程
 
 ```
 病人掛號
    ↓
-讀取健保 IC 卡 → 取得 Patient resource（或新建）
+讀取健保 IC 卡 → 取得 Patient resource（或查詢既有）
    ↓
-牙醫師進行口腔檢查
+建立本次 Encounter
    ↓
-逐顆選取牙位（FDI 編號）
+牙醫師逐顆選取牙位（FDI 編號）
    ↓
 填入狀態 + 牙面 + 材料 / 探針深度 + X 光圖
    ↓
-系統產生符合 TWDentalObservation Profile 的 FHIR JSON
+系統產生 Observation（掛載於 Encounter）
+有 X 光 → 自動產生 DiagnosticReport（result 參照 Observation）
    ↓
-所有 Observation 掛載於本次 Encounter
-   ↓
-以 transaction Bundle POST 至 FHIR Server
+打包 transaction Bundle → POST 至 FHIR Server
    ↓
 AuditEvent 自動產生
 ```
 
-### 7.3 跨院調閱流程
-
-**核心原則：先彙整病人全部就醫紀錄，再依 Encounter 查詢細節。**
-
-```
-病人到新診所就診
-   ↓
-新診所系統讀取病人健保卡，取得 PID
-   ↓
-向 FHIR Server 查詢病人全部牙科就醫紀錄：
-GET /Observation?patient=PID-001&category=exam
-                &_sort=-date
-                &_include=Observation:encounter
-   ↓
-取得歷次就診 Encounter 清單後，
-視需要再查詢特定 Encounter 的完整 Observation 細節
-   ↓
-病人透過 SMART on FHIR App 授權
-（或事先對該機構設定的 Consent resource）
-   ↓
-回傳包含歷史牙齒狀態的 searchset Bundle
-   ↓
-新診所 HIS 解析並呈現全口歷史圖
-```
-
-### 7.4 跨院轉診完整情境：阻生齒手術轉介（技術摘要）
-
-> **本節為技術流程快覽，完整實務情境請見 [7.5 節](#75-跨院轉診實務情境referral-use-case)。**
-
-```
-王小明掛號診所A
-      ↓
-牙醫師發現 FDI 38 阻生
-      ↓
-建立 Observation + Media + ServiceRequest → transaction Bundle
-      ↓
-A 診所上傳至共享 FHIR Server（TLS 1.3 加密傳輸）
-      ↓
-王小明手機 App 確認授權（Consent resource 寫入，授權 B 醫院）
-      ↓
-診所B 取得 Access Token（OAuth 2.0 + PKCE）
-      ↓
-GET /Observation?patient=PID-WANG-001 → FHIR Server 驗證 Consent
-      ↓
-診所B HIS 還原全口牙位圖 + X 光影像
-      ↓
-口腔外科直接評估，安排手術
-```
-
 ---
 
-### 7.5 跨院轉診實務情境（Referral Use Case）
+## 9. FHIR Server 整合
 
-> **FHIR 核心價值體現：資料隨人走。**
-> A 醫院上傳先前之就醫診斷及處理結果至共享的 FHIR Server，再由民眾授權給就醫目標 B 醫院，實現資料無縫銜接。
+### 9.1 預設 FHIR Server
 
-#### 場景描述
-
-| 項目 | 內容 |
-|------|------|
-| **病人** | 王小明，32 歲，A123456789 |
-| **初診診所** | 陽光牙醫診所（臺中） · `ORG-TC-YANG-001` |
-| **轉診目的地** | 大心綜合醫院口腔外科（臺北） · `ORG-TP-DAXIN-002` |
-| **問題** | FDI 38（左下第三大臼齒）複雜阻生齒，需手術拔除 |
-| **FHIR 版本** | R4（4.0.1） |
-| **Profile** | `TWDentalObservation` · `TWDentalBundle` |
-
----
-
-#### Step 1｜資料封裝：陽光診所建立 FHIR Bundle 並上傳至共享 FHIR Server
-
-牙醫師在 Demo 系統點選 FDI `38`，記錄狀態，系統同步產生符合 Profile 的 Observation 及轉診相關資源，整批封裝為 **transaction Bundle** POST 至共享 FHIR Server。
-
-**Bundle 結構一覽：**
+Demo 系統預設連接 **HAPI FHIR 公開測試伺服器**（免費，無需 Token）：
 
 ```
-Bundle (type: transaction)
-  id: bundle-referral-20260410-001
-  meta.profile: https://twdental.org/fhir/StructureDefinition/TWDentalBundle
-  │
-  ├── entry[0] · Organization（陽光牙醫診所）
-  ├── entry[1] · Patient（王小明）
-  ├── entry[2] · Encounter（2026-04-10 本次就診）
-  ├── entry[3] · Observation（FDI 38 阻生齒 ← TWDentalObservation Profile）
-  ├── entry[4] · Media（全口 X 光影像 DICOM 參照）
-  └── entry[5] · ServiceRequest（轉診單，performer → 大心醫院）
+https://hapi.fhir.org/baseR4
 ```
 
-**Observation 完整 JSON（FDI 38 阻生齒）：**
+### 9.2 POST Bundle 至 FHIR Server
 
-```json
+```javascript
+// 系統自動使用 conditional PUT 避免重複資源
+POST https://hapi.fhir.org/baseR4/
+Content-Type: application/fhir+json
+
 {
-  "resourceType": "Observation",
-  "id": "obs-fdi38-20260410",
-  "status": "final",
-  "meta": {
-    "profile": [
-      "https://twdental.org/fhir/StructureDefinition/TWDentalObservation"
-    ]
-  },
-  "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category","code": "exam","display": "Exam"}]}],
-  "code": {"coding": [{"system": "http://snomed.info/sct","code": "110481000","display": "Dental observation"}]},
-  "subject": { "reference": "Patient/PID-WANG-20260410" },
-  "encounter": { "reference": "Encounter/ENC-20260410-001" },
-  "effectiveDateTime": "2026-04-10T09:30:00+08:00",
-  "performer": [{ "reference": "Practitioner/DR-LI-001" }],
-  "valueCodeableConcept": {"coding": [{"system": "http://snomed.info/sct","code": "110481000","display": "Dental observation（阻生）"}]},
-  "bodySite": {"coding": [{"system": "http://snomed.info/sct","code": "245648009","display": "Tooth structure"}]},
-  "extension": [
-    {"url": "https://twdental.org/fhir/StructureDefinition/tooth-fdi-number","valueCode": "38"},
-    {"url": "https://twdental.org/fhir/StructureDefinition/media-reference","valueReference": { "reference": "Media/xray-fullmouth-20260410" }},
-    {"url": "https://twdental.org/fhir/StructureDefinition/impaction-classification","valueCoding": {"system": "https://twdental.org/fhir/CodeSystem/impaction-type","code": "horizontal","display": "水平阻生"}}
-  ],
-  "note": [{"text": "左下智齒水平阻生，與 37 號牙根部接觸，建議轉介口腔外科評估手術拔除。已拍全口曲面斷層 X 光（panoramic）。"}]
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "Patient?identifier=https://twdental.org/id/patient|A199000001"
+      },
+      "resource": { ... }
+    },
+    ...
+  ]
 }
 ```
 
----
+### 9.3 從 FHIR Server 查詢（多重 identifier 搜尋）
 
-#### Step 2｜授權機制：王小明授權大心醫院
+系統支援三種查詢方式，自動依序嘗試：
 
-王小明收到手機 App 推播通知，確認授權大心醫院口腔外科調閱其牙科相關病歷。
-
-**Consent Resource（機構授權，不限單次 Encounter）：**
-
-```json
-{
-  "resourceType": "Consent",
-  "id": "consent-wang-daxin-20260410",
-  "status": "active",
-  "patient": { "reference": "Patient/PID-WANG-20260410" },
-  "provision": {
-    "type": "permit",
-    "period": { "start": "2026-04-10", "end": "2027-04-10" },
-    "actor": [{"reference": { "reference": "Organization/ORG-TP-DAXIN-002" }}],
-    "action": [{"coding": [{"code": "access"}]}],
-    "class": [
-      { "system": "http://hl7.org/fhir/resource-types", "code": "Observation" },
-      { "system": "http://hl7.org/fhir/resource-types", "code": "Media" },
-      { "system": "http://hl7.org/fhir/resource-types", "code": "DiagnosticReport" }
-    ]
-  }
-}
+```
+① 直接 GET /Patient/{HAPI數字ID}
+② GET /Patient?identifier={身分證號}
+③ GET /Patient?identifier=https://twdental.org/id/patient|{自訂ID}
 ```
 
-**授權範圍說明：**
+### 9.4 跨裝置資料共享
 
-| 項目 | 設定值 |
-|------|--------|
-| 授權機構 | 大心綜合醫院口腔外科（ORG-TP-DAXIN-002）**專屬** |
-| 可存取資源 | `Observation`、`Media`、`DiagnosticReport` |
-| 授權範圍 | 全部牙科紀錄（過去及未來），不限單次 Encounter |
-| 有效期限 | 1 年，可隨時由病人撤銷 |
-| Token 有效期 | 15 分鐘（短效，降低洩漏風險） |
-
----
-
-#### Step 3｜跨院調閱：大心醫院取得術前資料
-
-大心醫院 HIS 系統先查詢病人全部就醫紀錄彙整，再依需要深入特定 Encounter 細節。
-
-```http
-# 1. 先查病人全部牙科 Observation（彙整歷史）
-GET /fhir/Observation?patient=PID-WANG-20260410
-    &category=exam
-    &_sort=-date
-    &_include=Observation:encounter
-Authorization: Bearer eyJ0eXAiOiJKV1Qi...
-
-# 2. 確認最新 Encounter，查詢此次轉診細節
-GET /fhir/Observation?patient=PID-WANG-20260410
-    &encounter=ENC-20260410-001
-    &_include=Observation:performer
-Authorization: Bearer eyJ0eXAiOiJKV1Qi...
-
-# 3. 取得 X 光影像 Media resource
-GET /fhir/Media?subject=PID-WANG-20260410
-    &encounter=ENC-20260410-001
-Authorization: Bearer eyJ0eXAiOiJKV1Qi...
+```
+步驟一：在任一裝置 POST 病人資料，記下 HAPI Patient ID
+步驟二：在任何裝置的查看頁輸入 Patient ID
+步驟三：系統自動拉取 Patient + Observation + Encounter
+步驟四：可開啟 HAPI FHIR Swagger UI 進行進階查詢
 ```
 
-**成效對比：**
-
-| 項目 | 傳統轉診（無 FHIR） | 本方案（TWDentalObservation） |
-|------|--------------------|-----------------------------|
-| X 光 | 重新拍攝（500–1,500 元） | ✅ 直接取用（Media resource） |
-| 全口評估 | 重做（15–30 分鐘） | ✅ 由 Observation 自動還原 |
-| 資料正確性 | 靠病人口述，易遺漏 | ✅ 結構化 FHIR JSON，標準化 |
-| 術前等待時間 | 1–2 週（等影像、等病歷） | ✅ 即時取得（授權後數秒） |
-| 隱私保護 | 紙本病歷傳真，難以追蹤 | ✅ Consent 細粒度控制 + AuditEvent |
+HAPI FHIR Swagger UI：`https://hapi.fhir.org/baseR4/swagger-ui/`
 
 ---
 
-#### AuditEvent 稽核紀錄（本次轉診全程）
+## 10. 落地策略：FHIR Facade
 
-```json
-[
-  {
-    "resourceType": "AuditEvent",
-    "action": "C",
-    "recorded": "2026-04-10T09:30:00+08:00",
-    "agent": [{ "who": { "reference": "Practitioner/DR-LI-001" } }],
-    "entity": [{ "what": { "reference": "Observation/obs-fdi38-20260410" } }],
-    "purposeOfEvent": [{ "coding": [{ "code": "TREAT" }] }]
-  },
-  {
-    "resourceType": "AuditEvent",
-    "action": "C",
-    "recorded": "2026-04-10T10:05:00+08:00",
-    "agent": [{ "who": { "reference": "Patient/PID-WANG-20260410" } }],
-    "entity": [{ "what": { "reference": "Consent/consent-wang-daxin-20260410" } }],
-    "purposeOfEvent": [{ "coding": [{ "code": "PATRQT" }] }]
-  },
-  {
-    "resourceType": "AuditEvent",
-    "action": "R",
-    "recorded": "2026-04-10T10:35:00+08:00",
-    "agent": [{ "who": { "reference": "Organization/ORG-TP-DAXIN-002" } }],
-    "entity": [
-      { "what": { "reference": "Observation/obs-fdi38-20260410" } },
-      { "what": { "reference": "Media/xray-fullmouth-20260410" } }
-    ],
-    "purposeOfEvent": [{ "coding": [{ "code": "TREAT" }] }]
-  }
-]
+現有 HIS 系統不需改動核心資料庫，採用 **FHIR Facade 架構**漸進接入：
+
+```
+現有 HIS 系統（不需改動）
+        ↓
+  FHIR Facade 層（格式轉換 Middleware）
+  ├── 讀取 HIS 內部資料格式
+  ├── 轉換為符合 TWDentalObservation Profile 的 FHIR JSON
+  └── POST 至 FHIR Server
+        ↓
+  FHIR R4 Server（HAPI FHIR 或衛福部 Gateway）
+        ↓
+  其他診所 / 醫院 / 病人 App 調閱
 ```
 
+**三條落地路徑：**
+
+| 路徑 | 執行者 | 可行性 |
+|------|--------|--------|
+| 衛福部建置國家級 FHIR Gateway | 政府 | 中期（2–3 年） |
+| HIS 廠商自行整合（市場壓力驅動） | 廠商 | 短期（若標準被採納） |
+| 第三方整合商提供 SaaS Facade | 新創 | 短期（最快） |
+
+**Facade 三大優點：**
+1. **零侵入**：HIS 廠商只需開放一個資料讀取 API 給 Facade
+2. **漸進採用**：診所可先只輸出 FDI + 狀態，之後逐步加入探針深度、影像
+3. **廠商中立**：Facade 可由衛福部或第三方統一建置
+
 ---
 
-## 8. 使用者角色說明
+## 11. 牙位編號系統（FDI）
 
-| 角色 | 主要操作 | 對應 Demo 頁面 |
-|------|---------|--------------|
-| **牙醫師（輸入）** | 登入系統、讀取健保卡、逐顆記錄牙齒狀態、儲存 Observation | 牙醫師輸入 |
-| **牙醫師（查看）** | 查詢病人歷史紀錄、查看全口圖、閱讀 FHIR JSON | 牙醫師查看 |
-| **病人** | 輸入姓名+身分證號、查看全口狀態、閱讀建議、授權特定機構 Consent | 病人查看 |
-| **轉診接收方** | 先彙整病人全部牙科 Observation，再依 Encounter 查細節，免重複檢查 | 牙醫師查看（跨院情境） |
-| **診所 HIS** | 透過 FHIR Facade 產生符合 Profile 的 FHIR JSON，上傳至共享 FHIR Server | — |
-| **FHIR Server** | 驗證 Token、核查 Consent、回傳授權資料、自動寫入 AuditEvent | — |
+本 Profile 採用 **FDI World Dental Federation** 兩位數牙位系統。
 
----
-
-## 9. 牙位編號系統（FDI）
-
-本 Profile 採用 **FDI World Dental Federation** 的兩位數牙位系統，為台灣與國際牙科界標準。
-
-### 9.1 成人牙 FDI 對照圖
+### 11.1 成人牙 FDI 對照圖
 
 ```
               右上（1X）                      左上（2X）
@@ -715,10 +692,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1Qi...
               右下（4X）                      左下（3X）
 ```
 
-- **十位數** 代表象限（1=右上、2=左上、3=左下、4=右下）
-- **個位數** 代表牙齒位置（1=中門齒 → 8=第三大臼齒）
-
-### 9.2 乳牙 FDI 對照圖
+### 11.2 乳牙 FDI 對照圖
 
 ```
               右上（5X）                      左上（6X）
@@ -728,84 +702,123 @@ Authorization: Bearer eyJ0eXAiOiJKV1Qi...
               右下（8X）                      左下（7X）
 ```
 
-### 9.3 牙齒類型對照
-
-| FDI 個位數 | 牙齒類型 | 中文名稱 |
-|-----------|---------|---------|
-| 1, 2 | Incisor | 門齒 |
-| 3 | Canine | 犬齒 |
-| 4, 5 | Premolar | 小臼齒 |
-| 6, 7, 8 | Molar | 大臼齒 |
-
 ---
 
-## 10. 程式碼結構說明
+## 12. 程式碼結構說明
 
 本 Demo 為**單一 HTML 檔案**，不依賴任何框架或外部 JS 函式庫（字型除外）。
 
 ```
-tw_dental_v2_final.html
+tw_dental_v5.html
 │
-├── <style>                    全域 CSS 變數、版型、元件樣式
-├── HTML Pages（以 .page class 切換顯示）
-│   ├── #pg-login              醫師 / 病人登入頁
-│   ├── #pg-inp                牙醫師輸入（核心頁）
-│   ├── #pg-view               牙醫師查看
-│   ├── #pg-plogin             病人登入
-│   ├── #pg-ptview             病人查看結果
-│   ├── #pg-sec                資料安全架構說明
-│   └── #pg-code               FHIR 程式碼展示
+├── <style>                         CSS 變數、版型、元件樣式
+│
+├── HTML Pages（以 .page class 切換）
+│   ├── #pg-login                   登入頁（醫師 / 病人）
+│   ├── #pg-inp                     牙醫師輸入（核心頁）
+│   │   ├── FHIR GET 查詢卡片        從 FHIR Server 拉取既有病人
+│   │   ├── 全口牙位 SVG 圖
+│   │   ├── 診所 + 病人表單
+│   │   ├── 檢查記錄表單
+│   │   ├── FHIR 記事本（即時更新）
+│   │   └── FHIR Server 設定 + POST 結果
+│   ├── #pg-view                    牙醫師查看（含 FHIR Server 查詢）
+│   │   ├── localStorage 查詢
+│   │   ├── FHIR Server GET 查詢
+│   │   ├── 依牙位 FDI 查詢歷史
+│   │   └── Encounter 時序清單
+│   ├── #pg-plogin                  病人登入
+│   ├── #pg-ptview                  病人查看結果
+│   ├── #pg-xhosp                   跨院場景模擬（五步驟動畫）
+│   ├── #pg-sec                     資料安全架構說明
+│   ├── #pg-code                    FHIR 程式碼展示
+│   └── #pg-api                     🔗 API Explorer
 │
 └── <script>
-    ├── 常數定義（FDI 陣列、狀態定義、顏色對照）
+    ├── 常數定義
+    │   ├── FDI_U / FDI_L / BABY_U / BABY_L
+    │   ├── NAMES（FDI → 中文牙名）
+    │   ├── S（狀態定義：lbl / pill / snomed / adv）
+    │   └── ST_COLORS（狀態 → SVG 顏色）
     ├── 狀態管理（DB / TMP / curFdi / curMode）
-    ├── localStorage 讀寫
-    ├── 登入 / 登出
-    ├── IC 卡模擬
-    ├── 牙位 SVG 繪製引擎
-    ├── 表單操作（saveObs / commitPt）
-    ├── FHIR JSON 產生（updateNotepad / buildBundle）
+    ├── localStorage 讀寫（含 obsHistory 跨次就診歷史）
+    ├── FHIR Server 整合
+    │   ├── testFhirServer()         測試連線
+    │   ├── buildBundleForPost()     conditional PUT Bundle
+    │   ├── postBundleToFhir()       POST + 解析 Patient ID
+    │   ├── commitAndPost()          一鍵儲存 + POST
+    │   ├── fetchPatientFromFhir()   輸入頁：GET 拉取並填表單
+    │   └── fetchAndViewPatient()    查看頁：GET 拉取並顯示牙位圖
+    ├── SVG 牙位圖繪製引擎
+    │   ├── drawToothSVG()
+    │   └── buildDentalChart()
+    ├── Q2：依牙位查詢跨次就診歷史
+    │   ├── renderToothHistBtns()
+    │   └── queryToothHist()
+    ├── Q3：Encounter 資源（每次就診一筆）
+    │   └── renderEncounterList()
+    ├── Q4：DiagnosticReport（有 X 光時自動產生）
+    ├── 跨院場景動畫
+    │   └── xhStep()
+    ├── API Explorer
+    │   ├── apiGet()
+    │   └── apiBuildPatientResource() / apiBuildSearchBundle()
     └── 工具函式（hl / copyEl / showToast）
 ```
 
-### 10.1 主要函式說明
+### 12.1 主要函式說明
 
-| 函式 | 參數 | 說明 |
-|------|------|------|
-| `buildDentalChart(id, obs, mode, cb)` | containerId, 狀態物件, 模式, 點擊回調 | 在指定容器渲染 SVG 全口牙位圖 |
-| `drawToothSVG(cx, cy, type, isLower, status, baby)` | 座標, 牙型, 方向, 狀態, 乳牙 | 繪製單顆牙齒的解剖 SVG |
-| `updateNotepad()` | — | 即時更新右欄 FHIR 記事本 |
-| `buildBundle(pt)` | 病人物件 | 產生 transaction Bundle |
-| `saveObs()` | — | 將當前牙位狀態儲存至 TMP 暫存 |
-| `commitPt()` | — | 將 TMP 合併至 DB 並寫入 localStorage |
-| `simulateIC()` | — | 模擬健保 IC 卡讀取 |
-
----
-
-## 11. UI 元件設計說明
-
-### 11.1 色彩系統
-
-系統採用 Google Material 風格調色盤，以 CSS Variables 統一管理：
-
-| 變數 | 使用場景 |
-|------|---------|
-| `--blue` 系 | 主要按鈕、連結、選取狀態 |
-| `--green` 系 | 健康狀態、成功訊息 |
-| `--red` 系 | 蛀牙狀態、錯誤訊息 |
-| `--yellow` 系 | 牙周問題、警告提示 |
-| `--teal` 系 | 牙位圖、模式切換 |
-
-### 11.2 字型選用
-
-| 字型 | 用途 |
+| 函式 | 說明 |
 |------|------|
-| DM Sans | 介面主字型 |
-| JetBrains Mono | FHIR 代碼、FDI 編號、ID 徽章 |
+| `buildDentalChart(id, obs, mode, cb)` | 在指定容器渲染 SVG 全口牙位圖 |
+| `buildBundleForPost(pt)` | 產生 conditional PUT Bundle（避免重複資源）|
+| `postBundleToFhir(pt)` | POST Bundle 至 FHIR Server，解析回傳的 Patient ID |
+| `fetchPatientFromFhir()` | 從 FHIR Server GET Patient + Observation，填入輸入表單 |
+| `fetchAndViewPatient()` | 從 FHIR Server GET 病人資料，顯示牙位圖與 Encounter 清單 |
+| `commitPt()` | 將 TMP 儲存至 DB（含 Encounter 建立、obsHistory 累積）|
+| `queryToothHist(fdi, pid)` | 查詢單顆牙位的跨次就診歷史 |
+| `xhStep(step)` | 控制跨院場景五步驟動畫 |
+| `apiGet(endpoint)` | API Explorer 模擬 FHIR REST 回應 |
 
 ---
 
-## 12. 設計決策問答（師生討論）
+## 13. 變更記錄（Changelog）
+
+### v5.0（2026-04-14）— 當前版本
+
+- **新增** 真實 FHIR R4 Server 整合（HAPI FHIR GET/POST）
+- **新增** Conditional PUT Bundle 設計（避免重複資源，解決 HTTP 412 問題）
+- **新增** 多重 identifier 查詢支援（HAPI ID / 身分證號 / twdental ID）
+- **新增** Q2：依牙位 FDI 查詢跨次就診歷史
+- **新增** Q3：Encounter resource（每次就診一筆，含醫師、診所、時間）
+- **新增** Q4：DiagnosticReport（有 X 光時自動產生，result 參照 Observation）
+- **新增** 🔗 API Explorer（模擬 FHIR REST API，含 CapabilityStatement）
+- **新增** 跨院場景（五步驟動畫：A 診所 → FHIR Server → 授權 → B 醫院）
+- **新增** 13 位示範病人（含多位台灣知名人士姓名）
+- **改善** PID 直接使用身分證號，提升跨次就診資料關聯性
+- **改善** obsHistory 機制，保留歷史觀察紀錄
+
+### v3.0（2026-04-10）
+
+- 修正 7 個 Bug（登入頁、Bundle 顯示、Stats 計算、navbar 高亮、複製功能等）
+- 新增轉診情境頁（Observation + ServiceRequest + Consent + AuditEvent）
+- Observation JSON 記事本顯示完整標準欄位
+
+### v2（2026-04-08）
+
+- 新增 SVG 全口牙位圖（純程式碼繪製）
+- 新增乳牙 / 混合齒列模式
+- 新增 14 種填補材料健保代碼 CodeSystem
+- 新增資料安全架構說明頁
+
+### v1（初始版本）
+
+- 基本 FHIR Observation 結構定義
+- 簡易牙位選取介面
+- localStorage 儲存
+
+---
+## 14. 設計決策問答（師生討論）
 
 本節整理導師針對核心設計問題的回饋，作為後續精進的依據。
 
@@ -908,96 +921,90 @@ GET /Observation?patient=PID-001
 
 ---
 
-## 13. 變更記錄（Changelog）
-
-### v2.2（2026-04-26）— 當前版本
-
-- **新增** §12 設計決策問答（師生討論），整合導師對 10 題設計問題的回饋
-- **更新** §3.2 資料模型設計：補充「每顆牙一筆 Observation」的設計理由與牙位歷史查詢語法
-- **更新** §6.2 Consent 授權模式：由「Encounter 限定授權」改為「病人授權特定醫院，涵蓋過去與未來病歷，可撤銷」
-- **更新** §7.3 跨院調閱流程：強調「先彙整全部就醫紀錄，再查 Encounter 細節」的查詢順序
-- **更新** §7.5 跨院轉診實務情境：調整授權情境為機構授權，不限單次 Encounter
-- **更新** §8 使用者角色說明：補充診所 HIS 透過 FHIR Facade 上傳至共享 FHIR Server
-- **更新** §5.4 AI 整合說明：明確 DiagnosticReport 參照 Observation 的分層架構
-- **更新** §14 未來展望：調整落地路徑，加入需求說明會與合作計畫募資步驟
-
-### v2.1（2026-04-18）
-
-- 新增 §7.5 跨院轉診實務情境完整章節（ServiceRequest、SMART on FHIR、AuditEvent）
-- 新增 §7.4 技術摘要
-- 新增「轉診接收方」與「FHIR Server」兩個使用者角色
-
-### v2（2026-04-08）
-
-- 新增 SVG 全口牙位圖（純程式碼繪製）
-- 新增乳牙 / 混合齒列模式
-- 新增 X 光影像上傳與 Media reference
-- 新增 14 種填補材料健保代碼 CodeSystem
-- 新增 FHIR 程式碼頁、資料安全架構說明頁
-
-### v1（初始版本）
-
-- 基本 FHIR Observation 結構定義
-- 簡易牙位選取介面
-- localStorage 儲存
-
----
-
-## 14. 未來展望
-
-### 0. 落地策略：FHIR Facade 漸進式接入
-
-台灣主要 HIS 廠商（如醫揚、昌達、佳醫等）系統架構各異，全面改寫核心資料庫不現實。採用 **FHIR Facade 架構**：現有 HIS 不動，由 Facade Middleware 讀取 HIS 內部格式並轉換為 TWDentalObservation FHIR JSON，POST 至共享 FHIR Server。
-
-**推廣路徑（依導師建議）：**
-
-1. 辦理「FHIR 口腔醫學需求說明會」，招募診所、醫院、HIS 廠商合作單位，了解實際需求
-2. 撰寫合作計畫書，向衛福部、健保署、相關基金會募集資金
-3. 建立長期維護團隊，確保系統可持續運作
-
-**商業模式選項：**
-
-| 路徑 | 執行者 | 可行性 |
-|------|--------|--------|
-| 衛福部建置國家級 FHIR Gateway | 政府 | 中期（2–3 年） |
-| HIS 廠商自行整合（市場壓力） | 廠商 | 短期（若標準被採納） |
-| 第三方整合商提供 SaaS Facade | 新創 | 短期（最快） |
-
+## 15. 未來展望
 ### 短期（3–6 個月）：基礎架構與標準建立
 
-- 完成 StructureDefinition 完整 snapshot
-- 提交至 HL7 台灣分部進行標準審查，啟動 Micro IG 工作小組討論技術嚴謹性
-- 新增 Encounter resource，完整描述單次就診流程
-- 支援多牙位批次儲存
+- 完成 StructureDefinition 完整 snapshot（含 Observation 繼承欄位）
+- 提交至 **HL7 台灣分部**進行標準審查
+- 整合 **HAPI FHIR Server** 正式環境（由 localhost 升級至雲端）
+- 實作 **SMART on FHIR OAuth 2.0 + PKCE** 授權機制
+- 建立 Consent resource UI（病患隱私與授權管理介面）
 
 ### 中期（6–12 個月）：系統整合與功能升級
 
-- 整合 HAPI FHIR Server（由 localStorage 升級至 FHIR API）
-- 實作 SMART on FHIR 授權機制（機構授權模式）
-- 建立 Consent resource UI（病患授權管理，可撤銷）
-- 開發 AI 影像分析原型（X 光蛀牙偵測），以 DiagnosticReport 呈現結果
+- 開發六點牙周探針深度視覺化圖表
+- 建立 2D 牙位圖互動輸入（精準標記疼痛與症狀）
+- 開發 DiagnosticReport AI 影像分析整合
+- 建立個人健康紀錄（PHR）系統
+###  1. AI 診斷輔助（影像升級）
+* **「讓 AI 幫醫師先看一輪 X 光」**
+* **無縫整合**：在既有的 `DiagnosticReport` 裡掛載 AI 判讀結果，核心資料依舊儲存於 `Observation`。
+* **降低負擔**：AI 自動標記蛀牙與病灶，結果回寫至對應的牙位，醫師只需點擊「確認」而不需從零判讀。
+
+### 🏥 2. 智慧分流（醫療負載優化）
+* **「讓病人自動去對的醫院」**
+* 依據 FDI 牙位紀錄計算出病情複雜度（如水平阻生智齒），系統自動拋轉 `ServiceRequest` 啟動轉診建議。
+* 透過病情複雜度自動對齊在地醫療網絡量能，有效減少各大醫學中心門診異常塞車。
+
+### 🔔 3. 主動健康管理（從治療 → 預防）
+* **「系統會提醒你該回診」**
+* 依據這套系統收集到的 `Observation` 歷史紀錄，智慧運算蛀牙與牙周病風險等級。
+* 預判風險後，結合 `Appointment` 協助排程追蹤，並推送衛教資訊至病人手機端，實現**「從被動看病，轉型為主動預防」**。
+---
+> 💣 ⭐ **「我們的目標從來不是做完一個專案交差，而是讓這個醫療開源標準持續被使用、被傳承與成長。」**
 
 ### 長期（1 年以上）：AI 智慧醫療與產業落地
 
-- 建立跨時空健康數據分析（歷史＋即時資料整合）
-- 串接健保署申報系統（自動填補材料申報）
-- 推廣至診所 HIS 系統廠商
-- 建立台灣牙科 FHIR Implementation Guide 標準
+- 串接 AI 影像分析（X 光蛀牙偵測），以 DiagnosticReport 呈現結果
+- 串接**健保署申報系統**（自動填補材料申報，mapping tw-dental-material → 健保代碼）
+- 推廣至診所 HIS 系統廠商（醫揚、昌達等）
+- 建立**台灣牙科 FHIR Implementation Guide** 標準
 - 推動正式納入 FHIR 國家標準體系
 
 ---
 
-## 15. 參考資料
+###  未來藍圖：從競賽專案走向生態圈擴展
+
+####  1. FHIR 推廣（主軸核心）
+**「讓更多人理解並使用 FHIR」**
+* 建立標準化的台灣牙科 FHIR 範例與開源教學 Demo。
+* 計畫推行至校內課程系統。
+*  **讓技術「被用」，而不是只在台上被看。**
+
+####  2.校園傳承（永續開源）
+**「讓這個專案可以一直被延續」**
+* 將此專案提煉為模組，交由學弟妹接續開發與擴充。
+* 藉由 AI Code 協作工具大幅降低接手門檻。
+*  **從一個純軟體作品，化為一個推動醫資教學的開源平台。**
+
+####  3. 產學實務合作
+**「與真實醫療場域接軌」**
+* 與在地基層牙醫診所及大型醫院牙科部持續交流實務需求。
+* 以小規模試辦（PoC）的形式，測試 FHIR Observation 於真實臨床的相容性，強調系統的落地可行性。
+
+####  4. 未來發展機會
+* 未來可延伸參與政府「U-start 創新創業計畫」，探索技術向實體方案轉化的可能性，發揮更大的社會影響力。
+* 
+**「我們的系統不是單一工具，而是一個可以持續進化的醫療資料平台」**  
+> 所有 AI 功能都不需要重構系統，FHIR 架構天然可擴充。從單純的資料交換，正式走向智慧醫療生態系。
+---
+
+## 16. 參考資料
 
 - [HL7 FHIR R4 Observation Resource](https://hl7.org/fhir/R4/observation.html)
+- [HL7 FHIR R4 Encounter Resource](https://hl7.org/fhir/R4/encounter.html)
+- [HL7 FHIR R4 DiagnosticReport Resource](https://hl7.org/fhir/R4/diagnosticreport.html)
 - [SMART on FHIR Authorization Guide](https://smarthealthit.org/)
+- [HAPI FHIR Server](https://hapi.fhir.org/)
 - [FDI World Dental Federation — Tooth Numbering](https://www.fdiworlddental.org/)
 - [SNOMED CT Browser — Dental Concepts](https://browser.ihtsdotools.org/)
 - [衛生福利部 — 台灣 FHIR Implementation Guide](https://twcore.mohw.gov.tw/)
 - [UCUM — The Unified Code for Units of Measure](https://ucum.org/)
 - [全民健康保險醫療費用支付標準](https://www.nhi.gov.tw/)
+- [健康存摺 My Health Bank](https://myhealthbank.nhi.gov.tw/)
 
 ---
 
-*本作品由 **牙起來** 隊伍製作，參加第二屆 FHIR 大健康 PROJECTATION*
-*Demo 系統版本：v2.2 — 2026-04-26*
+*本作品由 **牙起來** 隊伍製作，參加第二屆 FHIR 大健康 PROJECTATION*  
+*Demo 系統版本：v5.0 — 2026-04-14*  
+*GitHub：[dental-fhir-demo](https://github.com/dwz0907676455-bot/dental-fhir-demo)*
