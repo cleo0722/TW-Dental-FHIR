@@ -2359,7 +2359,7 @@
             '41': '右下中門齒', '42': '右下側門齒', '43': '右下犬齒', '44': '右下第一小臼齒', '45': '右下第二小臼齒',
             '46': '右下第一大臼齒', '47': '右下第二大臼齒', '48': '右下第三大臼齒',
             '51': '右上乳中門齒', '52': '右上乳側門齒', '53': '右上乳犬齒', '54': '右上第一乳臼齒', '55': '右上第二乳臼齒',
-            '61': '左上乳中門齒', '62': '左上乳側門齒', '63': '左上乳犬齒', '64': '左上第一乳臼齒', '65': '左上第二乳臼齒',
+            '61': '左上乳中門齒', '62': '左上側門齒', '63': '左上乳犬齒', '64': '左上第一乳臼齒', '65': '左上第二乳臼齒',
             '71': '左下乳中門齒', '72': '左下乳側門齒', '73': '左下乳犬齒', '74': '左下第一乳臼齒', '75': '左下第二乳臼齒',
             '81': '右下乳中門齒', '82': '右下乳側門齒', '83': '右下乳犬齒', '84': '右下第一乳臼齒', '85': '右下第二乳臼齒'
         };
@@ -2643,11 +2643,11 @@
             Object.values(DB).forEach(pt => {
                 // check obs history per patient per tooth
                 if (pt.obs[fdi]) {
-                    entries.push({ date: pt.obs[fdi].date || '—', status: pt.obs[fdi].status, clinic: pt.obs[fdi].clinic || pt.lastClinic || '—', note: pt.obs[fdi].note || '' });
+                    entries.push({ date: pt.obs[fdi].date || '—', status: pt.obs[fdi].status, clinic: pt.obs[fdi].clinic || '—', note: pt.obs[fdi].note || '' });
                 }
                 // also check historical observations if stored
                 if (pt.obsHistory && pt.obsHistory[fdi]) {
-                    pt.obsHistory[fdi].forEach(h => entries.push({ date: h.date, status: h.status, clinic: h.clinic, note: h.note || '' }));
+                    pt.obsHistory[fdi].forEach(h => entries.push({ date: h.date, status: h.status, clinic: h.clinic || '—', note: h.note || '' }));
                 }
             });
             entries.sort((a, b) => b.date.localeCompare(a.date));
@@ -2847,7 +2847,6 @@
         }
 
         function buildBundleForPost(pt) {
-            // ══ 根本解法：全部改用 conditional PUT（ifNoneExist）
             // HAPI FHIR 412 原因：PUT /Resource/ID 在資源已存在時會衝突
             // conditional PUT = "若不存在才建立；若已存在則更新" → 永不 412
             const xrayObs = Object.keys(pt.obs).filter(f => pt.obs[f].xray);
@@ -2872,7 +2871,7 @@
                         identifier: [{ system: 'https://twdental.org/id/org', value: pt.oid }]
                     }
                 },
-                // Patient: 已知 ID 即用 PUT 更新，未知才直接 POST，徹底解決 412 重複問題
+                // Patient: 已知 ID 即用 PUT 更新，未知才直接 POST
                 {
                     fullUrl: patientUrn,
                     request: (pt.apid && pt.apid.match(/^\d+$/)) ? {
@@ -2885,7 +2884,10 @@
                     resource: {
                         resourceType: 'Patient',
                         ...((pt.apid && pt.apid.match(/^\d+$/)) ? { id: pt.apid } : {}),
-                        identifier: [{ system: 'https://twdental.org/id/patient', value: pt.pid }],
+                        identifier: [
+                            { use: 'official', system: 'https://twdental.org/id/tw-national-id', value: pt.pid }, // 加入身分證號 (Q1)
+                            { system: 'https://twdental.org/id/patient', value: pt.apid || pt.pid }
+                        ],
                         name: [{ use: 'official', text: pt.name }],
                         ...(pt.dob ? { birthDate: pt.dob } : {}),
                         managingOrganization: { reference: 'urn:uuid:org-' + pt.oid }
@@ -2908,7 +2910,7 @@
                         serviceType: { coding: [{ system: 'http://snomed.info/sct', code: '394578005', display: 'Dental specialty' }] },
                         subject: { reference: patientUrn },
                         serviceProvider: { reference: 'urn:uuid:org-' + pt.oid },
-                        period: {
+                        period: { // 時區標準化 (Q3)
                             start: (latestEnc.date || '2026-01-01') + 'T08:00:00+08:00',
                             end: (latestEnc.date || '2026-01-01') + 'T08:30:00+08:00'
                         },
@@ -2934,7 +2936,7 @@
                         code: { coding: [{ system: 'http://loinc.org', code: '32480-4', display: 'Physical findings of Teeth' }], text: '牙齒口腔觀察 FDI ' + f },
                         subject: { reference: patientUrn },
                         ...(stableEncId ? { encounter: { reference: 'urn:uuid:' + stableEncId } } : {}),
-                        effectiveDateTime: (o.date || '2026-01-01') + 'T00:00:00+08:00',
+                        effectiveDateTime: (o.date || '2026-01-01') + 'T00:00:00+08:00', // 時區標準化 (Q3)
                         valueCodeableConcept: { coding: [{ system: 'http://snomed.info/sct', code: S[o.status].snomed, display: S[o.status].lbl }] },
                         extension: [
                             { url: 'https://twdental.org/fhir/StructureDefinition/tooth-fdi-number', valueCode: f },
@@ -2972,7 +2974,7 @@
                         code: { coding: [{ system: 'http://loinc.org', code: '36643-5', display: 'Dental X-ray' }] },
                         subject: { reference: patientUrn },
                         ...(stableEncId ? { encounter: { reference: 'urn:uuid:' + stableEncId } } : {}),
-                        effectiveDateTime: (latestEnc?.date || '2026-01-01') + 'T00:00:00+08:00',
+                        effectiveDateTime: (latestEnc?.date || '2026-01-01') + 'T00:00:00+08:00', // 時區標準化 (Q3)
                         result: xrayObs.map(f => ({
                             reference: 'urn:uuid:obs-' + pt.apid + '-fdi' + f,
                             display: 'FDI ' + f + ' · ' + S[pt.obs[f].status].lbl
@@ -2998,7 +3000,6 @@
             resultBody.innerHTML = '<span style="color:var(--blue-dk)">目標：' + url + '/</span><br>Bundle 資源數：' + bundle.entry.length + ' 筆（含 Organization、Patient、Encounter、Observation 等）';
             resultJson.style.display = 'none';
             try {
-                // ★修正2：Bundle transaction POST 到 baseR4（不加多餘的 /）
                 const r = await fetch(url, {
                     method: 'POST', headers: getFhirHeaders(),
                     body: JSON.stringify(bundle), signal: AbortSignal.timeout(20000)
@@ -3062,7 +3063,6 @@
             const idnum = document.getElementById('pt-idnum').value.trim().toUpperCase();
             if (!name || !idnum) { alert('請先填寫姓名與身分證號'); return }
             if (Object.keys(TMP).length === 0) { alert('請先記錄至少一顆牙位'); return }
-            // ★修正：先記住 key，commitPt() 會清空表單，之後才能正確查 DB
             const dbKey = idnum;
             commitPt();
             const pt = DB[dbKey];
@@ -3193,8 +3193,8 @@
             el.style.display = 'block';
             title.textContent = `FDI ${fdi} ─ ${NAMES[fdi] || fdi} · 跨次就診歷史`;
             const entries = [];
-            if (pt.obs[fdi]) entries.push({ date: pt.obs[fdi].date || '—', status: pt.obs[fdi].status, clinic: pt.obs[fdi].clinic || pt.lastClinic || '—', note: pt.obs[fdi].note || '', encId: '' });
-            if (pt.obsHistory && pt.obsHistory[fdi]) pt.obsHistory[fdi].forEach(h => entries.push({ date: h.date, status: h.status, clinic: h.clinic, note: h.note || '', encId: '' }));
+            if (pt.obs[fdi]) entries.push({ date: pt.obs[fdi].date || '—', status: pt.obs[fdi].status, clinic: pt.obs[fdi].clinic || '—', note: pt.obs[fdi].note || '', encId: '' });
+            if (pt.obsHistory && pt.obsHistory[fdi]) pt.obsHistory[fdi].forEach(h => entries.push({ date: h.date, status: h.status, clinic: h.clinic || '—', note: h.note || '', encId: '' }));
             entries.sort((a, b) => b.date.localeCompare(a.date));
             if (!entries.length) { list.innerHTML = '<div class="hist-empty">此牙位無異常紀錄，歷史狀態均健康</div>'; return }
             list.innerHTML = `
@@ -3236,7 +3236,7 @@
         function renderObsList(id, obs, pt) {
             const items = Object.keys(obs).filter(f => obs[f].status !== 'h').map(f => ({ fdi: f, ...obs[f] }));
             if (!items.length) { document.getElementById(id).innerHTML = '<div style="text-align:center;padding:2rem;font-size:13px;color:var(--g500)">所有牙齒狀態正常 🎉</div>'; return }
-            document.getElementById(id).innerHTML = items.map(o => { const sm = S[o.status]; let ex = ''; if (o.surfs) ex += '牙面：' + o.surfs + '<br>'; if (o.material) ex += '材料：' + o.material + '<br>'; if (o.depth) ex += '探針：' + o.depth + 'mm<br>'; if (o.xray) ex += 'X光：' + o.xray.name + '<br>'; if (o.note) ex += '備註：' + o.note + '<br>'; ex += '診所：' + (o.clinic || pt.lastClinic || '—') + '<br>SNOMED：' + sm.snomed; return `<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[o.fdi] || o.fdi} <span style="color:var(--g500);font-size:10px;font-family:'JetBrains Mono',monospace">FDI ${o.fdi}</span></div><div style="margin-top:3px;display:flex;gap:4px;align-items:center"><span class="pill ${sm.pill}">${sm.lbl}</span>${o.xray ? '<span style="font-size:10px;background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:10px">X光</span>' : ''}</div></div><div style="font-size:11px;color:var(--g500)">${o.date || ''}</div></div><div class="tl-body">${ex}</div></div>` }).join('');
+            document.getElementById(id).innerHTML = items.map(o => { const sm = S[o.status]; let ex = ''; if (o.surfs) ex += '牙面：' + o.surfs + '<br>'; if (o.material) ex += '材料：' + o.material + '<br>'; if (o.depth) ex += '探針：' + o.depth + 'mm<br>'; if (o.xray) ex += 'X光：' + o.xray.name + '<br>'; if (o.note) ex += '備註：' + o.note + '<br>'; ex += '診所：' + (o.clinic || '—') + '<br>SNOMED：' + sm.snomed; return `<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[o.fdi] || o.fdi} <span style="color:var(--g500);font-size:10px;font-family:'JetBrains Mono',monospace">FDI ${o.fdi}</span></div><div style="margin-top:3px;display:flex;gap:4px;align-items:center"><span class="pill ${sm.pill}">${sm.lbl}</span>${o.xray ? '<span style="font-size:10px;background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:10px">X光</span>' : ''}</div></div><div style="font-size:11px;color:var(--g500)">${o.date || ''}</div></div><div class="tl-body">${ex}</div></div>` }).join('');
         }
 
         // ══════════════════════════
@@ -3267,7 +3267,7 @@
             const alerts = Object.keys(pt.obs).filter(f => ['c', 'p', 'm'].includes(pt.obs[f].status));
             document.getElementById('pt-alerts').innerHTML = alerts.length ? alerts.map(f => { const sm = S[pt.obs[f].status]; return `<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--g100)"><div><div style="font-size:13px;font-weight:500">${NAMES[f] || f}</div><div style="font-size:11px;color:var(--g600);margin-top:2px;line-height:1.5">${sm.adv}</div></div><span class="pill ${sm.pill}" style="margin-left:8px;flex-shrink:0">${sm.lbl}</span></div>` }).join('') : '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--g500)">目前沒有需要特別注意的牙齒 🎉</div>';
             const tItems = Object.keys(pt.obs).filter(f => pt.obs[f].status !== 'h');
-            document.getElementById('pt-tl').innerHTML = tItems.length ? tItems.map(f => { const sm = S[pt.obs[f].status]; const o = pt.obs[f]; return `<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[f] || f}</div><span class="pill ${sm.pill}" style="margin-top:3px">${sm.lbl}</span></div><div style="font-size:11px;color:var(--g500)">${o.date || ''}</div></div><div class="tl-body">${sm.adv ? '建議：' + sm.adv + '<br>' : ''}診所：${o.clinic || pt.lastClinic || '—'}${o.note ? '<br>說明：' + o.note : ''}</div></div>` }).join('') : '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--g500)">所有牙齒狀態正常</div>';
+            document.getElementById('pt-tl').innerHTML = tItems.length ? tItems.map(f => { const sm = S[pt.obs[f].status]; const o = pt.obs[f]; return `<div class="tl-item" onclick="this.classList.toggle('open')"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">${NAMES[f] || f}</div><span class="pill ${sm.pill}" style="margin-top:3px">${sm.lbl}</span></div><div style="font-size:11px;color:var(--g500)">${o.date || ''}</div></div><div class="tl-body">${sm.adv ? '建議：' + sm.adv + '<br>' : ''}診所：${o.clinic || '—'}${o.note ? '<br>說明：' + o.note : ''}</div></div>` }).join('') : '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--g500)">所有牙齒狀態正常</div>';
         }
         function showPtDetail(fdi, obs) { showDetail('pt-detail-box', fdi, obs); document.getElementById('pt-detail-box').style.display = 'block' }
 
@@ -3366,7 +3366,10 @@
                 resourceType: 'Patient',
                 id: p.apid,
                 meta: { profile: ['https://twdental.org/fhir/StructureDefinition/TWDentalPatient'], lastUpdated: (p.lastDate ? p.lastDate + 'T00:00:00+08:00' : new Date().toISOString()) },
-                identifier: [{ use: 'official', system: 'https://twdental.org/id/patient', value: p.pid }],
+                identifier: [
+                    { use: 'official', system: 'https://twdental.org/id/tw-national-id', value: p.pid }, // 加入身分證號 (Q1)
+                    { system: 'https://twdental.org/id/patient', value: p.apid || p.pid }
+                ],
                 name: [{ use: 'official', text: p.name }],
                 birthDate: p.dob || undefined,
                 gender: 'unknown',
