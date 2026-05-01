@@ -135,7 +135,7 @@ xdg-open tw_dental_v5.html     # Linux
 
 **方法二：GitHub Pages（線上 Demo）**
 ```
-https://dwz0907676455-bot.github.io/dental-fhir-demo/
+https://dwz0907676455-bot.github.io/2.0_dental-fhir-demo/dental_fhir_v5%20(1)
 ```
 
 ### 4.3 完整 Demo 流程
