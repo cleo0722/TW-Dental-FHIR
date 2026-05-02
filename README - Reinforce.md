@@ -110,6 +110,7 @@ TWDentalObservation
 ```
 https://twdental.org/fhir/StructureDefinition/TWDentalObservation
 ```
+ **📝 備註**：在現階段的 Demo 原型中，此 URL 僅作為 FHIR 資料交換時的**唯一識別碼（Canonical Identifier）**，這代表它是一組寫在程式與 JSON 資料內的「身分證字號」，用來標註資料符合台灣牙科觀察規範，並非一個可直接開啟的網頁。如需了解此 Profile 的詳細欄位規則與說明，請直接參閱後方的 [5. FHIR 技術規格](#5-fhir-技術規格)。
 
 ---
 
